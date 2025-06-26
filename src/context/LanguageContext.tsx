@@ -13,6 +13,7 @@ interface LanguageContextType {
   learningLanguage: string;
   setNativeLanguage: (lang: string) => void;
   setLearningLanguage: (lang: string) => void;
+  updateLanguagesFromSession: (nativeLanguage: string, learningLanguage: string) => void;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(
@@ -56,6 +57,11 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     setLearningLanguageState(lang);
   };
 
+  const updateLanguagesFromSession = (sessionNativeLanguage: string, sessionLearningLanguage: string) => {
+    setNativeLanguageState(sessionNativeLanguage);
+    setLearningLanguageState(sessionLearningLanguage);
+  };
+
   return (
     <LanguageContext.Provider
       value={{
@@ -63,6 +69,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
         learningLanguage,
         setNativeLanguage,
         setLearningLanguage,
+        updateLanguagesFromSession,
       }}
     >
       {children}

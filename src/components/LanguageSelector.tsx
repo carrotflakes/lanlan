@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { useLanguage } from '@/context/LanguageContext';
+import { useChatSession } from '@/context/ChatSessionContext';
 
 const languages = [
   'English',
@@ -25,6 +26,21 @@ const languageEmojis: { [key: string]: string } = {
 
 export default function LanguageSelector() {
   const { nativeLanguage, setNativeLanguage, learningLanguage, setLearningLanguage } = useLanguage();
+  const { currentSession, updateSessionLanguages } = useChatSession();
+
+  const handleNativeLanguageChange = (lang: string) => {
+    setNativeLanguage(lang);
+    if (currentSession) {
+      updateSessionLanguages(currentSession.id, lang, learningLanguage);
+    }
+  };
+
+  const handleLearningLanguageChange = (lang: string) => {
+    setLearningLanguage(lang);
+    if (currentSession) {
+      updateSessionLanguages(currentSession.id, nativeLanguage, lang);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -37,7 +53,7 @@ export default function LanguageSelector() {
             id="native-language"
             className="w-full pl-4 pr-12 py-3 text-base border-2 border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent rounded-xl bg-white shadow-sm transition-all duration-200"
             value={nativeLanguage}
-            onChange={(e) => setNativeLanguage(e.target.value)}
+            onChange={(e) => handleNativeLanguageChange(e.target.value)}
           >
             {languages.map((lang) => (
               <option key={lang} value={lang}>
@@ -66,7 +82,7 @@ export default function LanguageSelector() {
             id="learning-language"
             className="w-full pl-4 pr-12 py-3 text-base border-2 border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent rounded-xl bg-white shadow-sm transition-all duration-200"
             value={learningLanguage}
-            onChange={(e) => setLearningLanguage(e.target.value)}
+            onChange={(e) => handleLearningLanguageChange(e.target.value)}
           >
             {languages.map((lang) => (
               <option key={lang} value={lang}>
