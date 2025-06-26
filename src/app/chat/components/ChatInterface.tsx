@@ -145,16 +145,16 @@ export default function ChatInterface() {
   };
 
   return (
-    <div className="flex flex-col h-full bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-200">
-      <div className="flex-grow overflow-y-auto p-4 space-y-3">
+    <div className="flex flex-col h-full bg-white/80 backdrop-blur-sm rounded-xl sm:rounded-2xl shadow-xl border border-gray-200">
+      <div className="flex-grow overflow-y-auto p-2 sm:p-4 space-y-2 sm:space-y-3">
         {messages.length === 0 ? (
           <div className="flex items-center justify-center h-full text-center">
-            <div className="space-y-4">
-              <div className="text-6xl">💬</div>
-              <h3 className="text-xl font-semibold text-gray-700">
+            <div className="space-y-3 sm:space-y-4 px-4">
+              <div className="text-4xl sm:text-6xl">💬</div>
+              <h3 className="text-lg sm:text-xl font-semibold text-gray-700">
                 {t('chat.startConversation')}
               </h3>
-              <p className="text-gray-500">
+              <p className="text-sm sm:text-base text-gray-500">
                 {t('chat.typeMessage')}
               </p>
             </div>
@@ -165,21 +165,21 @@ export default function ChatInterface() {
               key={index}
               className={`flex ${
                 msg.role === "user" ? "justify-end" : "justify-start"
-              } mb-4`}
+              } mb-3 sm:mb-4`}
             >
               <div
-                className={`max-w-[75%] rounded-2xl px-4 py-3 ${
+                className={`max-w-[85%] sm:max-w-[75%] rounded-xl sm:rounded-2xl px-3 sm:px-4 py-2 sm:py-3 ${
                   msg.role === "user"
                     ? "bg-gradient-to-r from-blue-500 to-indigo-600 text-white"
                     : "bg-gray-100 text-gray-800"
                 }`}
               >
-                <div className="flex items-center mb-2">
-                  <span className="text-sm font-medium opacity-80">
+                <div className="flex items-center mb-1 sm:mb-2">
+                  <span className="text-xs sm:text-sm font-medium opacity-80">
                     {msg.role === "user" ? `👤 ${t('chat.you')}` : `🤖 ${t('chat.aiAssistant')}`}
                   </span>
                 </div>
-                <div className="text-sm leading-relaxed">
+                <div className="text-sm sm:text-base leading-relaxed">
                   {msg.role === "model" ? (
                     <ReactMarkdown
                       components={{
@@ -198,10 +198,10 @@ export default function ChatInterface() {
                   )}
                 </div>
                 {msg.role === "model" && (
-                  <div className="flex items-center justify-start mt-3 pt-2 border-t border-gray-200">
-                    <div className="flex items-center space-x-3">
+                  <div className="flex items-center justify-start mt-2 sm:mt-3 pt-2 border-t border-gray-200">
+                    <div className="flex items-center space-x-2 sm:space-x-3">
                       <button
-                        className="flex items-center space-x-1 text-xs px-3 py-1 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-full transition-colors duration-200"
+                        className="flex items-center space-x-1 text-xs px-2 sm:px-3 py-1 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-full transition-colors duration-200"
                         onClick={() => handleTranslate(index, msg.parts)}
                         title={
                           msg.showTranslation && msg.translatedText
@@ -217,7 +217,7 @@ export default function ChatInterface() {
                         </span>
                       </button>
                       <button
-                        className="flex items-center space-x-1 text-xs px-3 py-1 bg-green-50 hover:bg-green-100 text-green-600 rounded-full transition-colors duration-200"
+                        className="flex items-center space-x-1 text-xs px-2 sm:px-3 py-1 bg-green-50 hover:bg-green-100 text-green-600 rounded-full transition-colors duration-200"
                         onClick={() => handleSpeak(msg.parts, learningLanguage)}
                         title="Play Audio"
                       >
@@ -263,11 +263,11 @@ export default function ChatInterface() {
         )}
         <div ref={messagesEndRef} />
       </div>
-      <div className="p-4 border-t border-gray-200">
-        <div className="flex space-x-3">
+      <div className="p-3 sm:p-4 border-t border-gray-200">
+        <div className="flex space-x-2 sm:space-x-3">
           <input
             type="text"
-            className="flex-grow px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white"
+            className="flex-grow px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border-2 border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white"
             placeholder={t('chat.inputPlaceholder')}
             value={input}
             onChange={(e) => setInput(e.target.value)}
@@ -279,7 +279,7 @@ export default function ChatInterface() {
             disabled={loading}
           />
           <button
-            className={`px-6 py-3 rounded-xl font-medium transition-all duration-200 ${
+            className={`px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base rounded-lg sm:rounded-xl font-medium transition-all duration-200 ${
               loading || !input.trim()
                 ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                 : "bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white shadow-md hover:shadow-lg transform hover:scale-105"

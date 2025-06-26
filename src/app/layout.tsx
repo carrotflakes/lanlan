@@ -4,6 +4,7 @@ import "./globals.css";
 import { LanguageProvider } from "@/context/LanguageContext";
 import { ChatSessionProvider } from "@/context/ChatSessionContext";
 import { UILanguageProvider } from "@/context/UILanguageContext";
+import { MobileProvider } from "@/context/MobileContext";
 import SessionSidebar from "@/components/SessionSidebar";
 import Header from "@/components/Header";
 
@@ -33,19 +34,21 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100`}
       >
         <UILanguageProvider>
-          <LanguageProvider>
-            <ChatSessionProvider>
-              <div className="flex h-screen">
-                <SessionSidebar />
-                <div className="flex-1 flex flex-col">
-                  <Header />
-                  <main className="flex-1 overflow-hidden p-3">
-                    {children}
-                  </main>
+          <MobileProvider>
+            <LanguageProvider>
+              <ChatSessionProvider>
+                <div className="flex h-screen">
+                  <SessionSidebar />
+                  <div className="flex-1 flex flex-col min-w-0">
+                    <Header />
+                    <main className="flex-1 overflow-y-auto p-2 sm:p-3">
+                      {children}
+                    </main>
+                  </div>
                 </div>
-              </div>
-            </ChatSessionProvider>
-          </LanguageProvider>
+              </ChatSessionProvider>
+            </LanguageProvider>
+          </MobileProvider>
         </UILanguageProvider>
       </body>
     </html>
