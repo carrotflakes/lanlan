@@ -46,6 +46,10 @@
     "translationFailed": "Translation failed.",
     "ttsNotSupported": "Text-to-speech not supported in your browser."
   },
+  "theme": {
+    "switchToDark": "Switch to Dark Mode",
+    "switchToLight": "Switch to Light Mode"
+  },
   "ui": {
     "home": "Home",
     "language": "Language"

@@ -46,6 +46,10 @@
     "translationFailed": "La traducción falló.",
     "ttsNotSupported": "La síntesis de voz no es compatible con tu navegador."
   },
+  "theme": {
+    "switchToDark": "Cambiar a Modo Oscuro",
+    "switchToLight": "Cambiar a Modo Claro"
+  },
   "ui": {
     "home": "Inicio",
     "language": "Idioma"

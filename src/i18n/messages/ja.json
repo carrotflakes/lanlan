@@ -46,6 +46,10 @@
     "translationFailed": "翻訳に失敗しました。",
     "ttsNotSupported": "お使いのブラウザでは音声読み上げがサポートされていません。"
   },
+  "theme": {
+    "switchToDark": "ダークモードに切替",
+    "switchToLight": "ライトモードに切替"
+  },
   "ui": {
     "home": "ホーム",
     "language": "言語"

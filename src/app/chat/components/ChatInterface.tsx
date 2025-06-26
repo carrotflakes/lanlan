@@ -145,7 +145,7 @@ export default function ChatInterface() {
   };
 
   return (
-    <div className="flex flex-col h-full bg-white/80 backdrop-blur-sm rounded-xl sm:rounded-2xl shadow-xl border border-gray-200">
+    <div className="flex flex-col h-full bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-xl sm:rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 transition-colors duration-300">
       <div className="flex-grow overflow-y-auto p-2 sm:p-4 space-y-2 sm:space-y-3">
         {messages.length === 0 ? (
           <div className="flex items-center justify-center h-full text-center">
@@ -171,7 +171,7 @@ export default function ChatInterface() {
                 className={`max-w-[85%] sm:max-w-[75%] rounded-xl sm:rounded-2xl px-3 sm:px-4 py-2 sm:py-3 ${
                   msg.role === "user"
                     ? "bg-gradient-to-r from-blue-500 to-indigo-600 text-white"
-                    : "bg-gray-100 text-gray-800"
+                    : "bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200"
                 }`}
               >
                 <div className="flex items-center mb-1 sm:mb-2">

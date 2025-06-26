@@ -8,7 +8,7 @@ export default function ChatPage() {
   return (
     <div className="h-full flex flex-col">
       <div className="mb-2 sm:mb-3">
-        <h1 className="text-base sm:text-lg font-semibold text-gray-800 flex items-center justify-center">
+        <h1 className="text-base sm:text-lg font-semibold  text-gray-700 dark:text-gray-300 flex items-center justify-center">
           🤖 {t('chat.title')}
         </h1>
       </div>

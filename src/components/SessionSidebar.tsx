@@ -61,8 +61,8 @@ export default function SessionSidebar() {
         className={`
           fixed lg:relative z-50 lg:z-auto
           w-64 sm:w-72 lg:w-64
-          bg-white/95 lg:bg-white/90 backdrop-blur-sm 
-          border-r border-gray-200 shadow-lg lg:shadow-lg
+          bg-white/95 lg:bg-white/90 dark:bg-gray-900/95 dark:lg:bg-gray-900/90 backdrop-blur-sm 
+          border-r border-gray-200 dark:border-gray-700 shadow-lg lg:shadow-lg
           flex flex-col h-screen
           transform transition-transform duration-300 ease-in-out
           ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
@@ -73,26 +73,26 @@ export default function SessionSidebar() {
         <div className="lg:hidden flex justify-end p-2">
           <button
             onClick={closeSidebar}
-            className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
           >
             <FaTimes size={16} />
           </button>
         </div>
         
-        <div className="p-3 lg:p-4 border-b border-gray-100 space-y-3">
-        <h2 className="text-base font-semibold text-gray-800 mb-1 flex items-center">
+        <div className="p-3 lg:p-4 border-b border-gray-100 dark:border-gray-700 space-y-3">
+        <h2 className="text-base font-semibold text-gray-800 dark:text-gray-100 mb-1 flex items-center">
           💬 {t('sidebar.sessions')}
         </h2>
         <button
           onClick={handleCreateSession}
-          className="w-full flex items-center justify-center bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-medium py-2 px-3 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md text-sm"
+          className="w-full flex items-center justify-center bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 dark:from-blue-600 dark:to-indigo-700 dark:hover:from-blue-700 dark:hover:to-indigo-800 text-white font-medium py-2 px-3 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md text-sm"
         >
           <FaPlus className="mr-1.5" size={12} /> {t('sidebar.newSession')}
         </button>
       </div>
         <div className="flex-grow overflow-y-auto p-2 lg:p-3 space-y-2">
         {sessions.length === 0 ? (
-          <div className="text-center text-gray-500 py-6">
+          <div className="text-center text-gray-500 dark:text-gray-400 py-6">
             <p className="text-xs">{t('sidebar.noSessions')}</p>
             <p className="text-xs mt-1 opacity-75">{t('sidebar.createToStart')}</p>
           </div>
@@ -102,16 +102,16 @@ export default function SessionSidebar() {
               key={session.id}
               className={`group flex items-center justify-between p-3 rounded-lg cursor-pointer transition-all duration-200 ${
                 currentSession?.id === session.id
-                  ? "bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 shadow-md"
-                  : "bg-gray-50 hover:bg-gray-100 border border-gray-200"
+                  ? "bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-2 border-blue-200 dark:border-blue-600 shadow-md"
+                  : "bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-700/50 border border-gray-200 dark:border-gray-600"
               }`}
               onClick={() => handleLoadSession(session.id)}
             >
               <div className="flex-1 min-w-0">
-                <h3 className="text-sm font-medium text-gray-800 truncate">
+                <h3 className="text-sm font-medium text-gray-800 dark:text-gray-100 truncate">
                   {session.name}
                 </h3>
-                <p className="text-xs text-gray-500 mt-0.5">
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                   {t('sidebar.messagesCount', { count: session.messages.length })} • {session.nativeLanguage.slice(0,2)}→{session.learningLanguage.slice(0,2)}
                 </p>
               </div>
@@ -126,7 +126,7 @@ export default function SessionSidebar() {
                     deleteSession(session.id);
                   }
                 }}
-                className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 p-1.5 rounded-md transition-all duration-200 hover:bg-red-50"
+                className="opacity-0 group-hover:opacity-100 text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 p-1.5 rounded-md transition-all duration-200 hover:bg-red-50 dark:hover:bg-red-900/30"
                 title="Delete session"
               >
                 <FaTrash size={12} />

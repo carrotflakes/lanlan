@@ -5,6 +5,7 @@ import { LanguageProvider } from "@/context/LanguageContext";
 import { ChatSessionProvider } from "@/context/ChatSessionContext";
 import { UILanguageProvider } from "@/context/UILanguageContext";
 import { MobileProvider } from "@/context/MobileContext";
+import { ThemeProvider } from "@/context/ThemeContext";
 import SessionSidebar from "@/components/SessionSidebar";
 import Header from "@/components/Header";
 
@@ -31,12 +32,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-gray-100 transition-colors duration-300`}
       >
         <UILanguageProvider>
-          <MobileProvider>
-            <LanguageProvider>
-              <ChatSessionProvider>
+          <ThemeProvider>
+            <MobileProvider>
+              <LanguageProvider>
+                <ChatSessionProvider>
                 <div className="flex h-screen">
                   <SessionSidebar />
                   <div className="flex-1 flex flex-col min-w-0">
@@ -46,9 +48,10 @@ export default function RootLayout({
                     </main>
                   </div>
                 </div>
-              </ChatSessionProvider>
-            </LanguageProvider>
-          </MobileProvider>
+                </ChatSessionProvider>
+              </LanguageProvider>
+            </MobileProvider>
+          </ThemeProvider>
         </UILanguageProvider>
       </body>
     </html>

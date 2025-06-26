@@ -47,13 +47,13 @@ export default function LanguageSelector() {
   return (
     <div className="space-y-6">
       <div className="space-y-3">
-        <label htmlFor="native-language" className="block text-sm font-semibold text-gray-700">
+        <label htmlFor="native-language" className="block text-sm font-semibold text-gray-700 dark:text-gray-200">
           🏠 {t('language.nativeLanguage')}
         </label>
         <div className="relative">
           <select
             id="native-language"
-            className="w-full pl-4 pr-12 py-3 text-base border-2 border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent rounded-xl bg-white shadow-sm transition-all duration-200"
+            className="w-full pl-4 pr-12 py-3 text-base border-2 border-gray-200 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-sm transition-all duration-200"
             value={nativeLanguage}
             onChange={(e) => handleNativeLanguageChange(e.target.value)}
           >
@@ -76,13 +76,13 @@ export default function LanguageSelector() {
       </div>
 
       <div className="space-y-3">
-        <label htmlFor="learning-language" className="block text-sm font-semibold text-gray-700">
+        <label htmlFor="learning-language" className="block text-sm font-semibold text-gray-700 dark:text-gray-200">
           🎯 {t('language.learningLanguage')}
         </label>
         <div className="relative">
           <select
             id="learning-language"
-            className="w-full pl-4 pr-12 py-3 text-base border-2 border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent rounded-xl bg-white shadow-sm transition-all duration-200"
+            className="w-full pl-4 pr-12 py-3 text-base border-2 border-gray-200 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-sm transition-all duration-200"
             value={learningLanguage}
             onChange={(e) => handleLearningLanguageChange(e.target.value)}
           >
