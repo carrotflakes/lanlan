@@ -3,6 +3,7 @@
 import React from 'react';
 import { useLanguage } from '@/context/LanguageContext';
 import { useChatSession } from '@/context/ChatSessionContext';
+import { useClientTranslations } from '@/hooks/useClientTranslations';
 
 const languages = [
   'English',
@@ -27,6 +28,7 @@ const languageEmojis: { [key: string]: string } = {
 export default function LanguageSelector() {
   const { nativeLanguage, setNativeLanguage, learningLanguage, setLearningLanguage } = useLanguage();
   const { currentSession, updateSessionLanguages } = useChatSession();
+  const { t } = useClientTranslations();
 
   const handleNativeLanguageChange = (lang: string) => {
     setNativeLanguage(lang);
@@ -46,7 +48,7 @@ export default function LanguageSelector() {
     <div className="space-y-6">
       <div className="space-y-3">
         <label htmlFor="native-language" className="block text-sm font-semibold text-gray-700">
-          🏠 Your Native Language
+          🏠 {t('language.nativeLanguage')}
         </label>
         <div className="relative">
           <select
@@ -57,11 +59,11 @@ export default function LanguageSelector() {
           >
             {languages.map((lang) => (
               <option key={lang} value={lang}>
-                {languageEmojis[lang]} {lang}
+                {languageEmojis[lang]} {t(`language.${lang.toLowerCase()}`)}
               </option>
             ))}
           </select>
-          <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+          <div className="absolute inset-y-0 right-2 flex items-center pr-3 pointer-events-none">
             <span className="text-2xl">{languageEmojis[nativeLanguage]}</span>
           </div>
         </div>
@@ -75,7 +77,7 @@ export default function LanguageSelector() {
 
       <div className="space-y-3">
         <label htmlFor="learning-language" className="block text-sm font-semibold text-gray-700">
-          🎯 Language to Learn
+          🎯 {t('language.learningLanguage')}
         </label>
         <div className="relative">
           <select
@@ -86,11 +88,11 @@ export default function LanguageSelector() {
           >
             {languages.map((lang) => (
               <option key={lang} value={lang}>
-                {languageEmojis[lang]} {lang}
+                {languageEmojis[lang]} {t(`language.${lang.toLowerCase()}`)}
               </option>
             ))}
           </select>
-          <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+          <div className="absolute inset-y-0 right-2 flex items-center pr-3 pointer-events-none">
             <span className="text-2xl">{languageEmojis[learningLanguage]}</span>
           </div>
         </div>

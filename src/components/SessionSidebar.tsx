@@ -2,6 +2,7 @@
 
 import { useChatSession } from "@/context/ChatSessionContext";
 import { useLanguage } from "@/context/LanguageContext";
+import { useClientTranslations } from "@/hooks/useClientTranslations";
 import { useRouter } from "next/navigation";
 import { FaPlus, FaTrash } from "react-icons/fa";
 
@@ -15,6 +16,7 @@ export default function SessionSidebar() {
   } = useChatSession();
   const { nativeLanguage, learningLanguage, updateLanguagesFromSession } =
     useLanguage();
+  const { t } = useClientTranslations();
   const router = useRouter();
 
   const handleLoadSession = (sessionId: string) => {
@@ -38,20 +40,20 @@ export default function SessionSidebar() {
     <aside className="w-64 bg-white/90 backdrop-blur-sm border-r border-gray-200 shadow-lg flex flex-col h-screen">
       <div className="p-4 border-b border-gray-100 space-y-3">
         <h2 className="text-base font-semibold text-gray-800 mb-1 flex items-center">
-          💬 Sessions
+          💬 {t('sidebar.sessions')}
         </h2>
         <button
           onClick={handleCreateSession}
           className="w-full flex items-center justify-center bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-medium py-2 px-3 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md text-sm"
         >
-          <FaPlus className="mr-1.5" size={12} /> New
+          <FaPlus className="mr-1.5" size={12} /> {t('sidebar.newSession')}
         </button>
       </div>
       <div className="flex-grow overflow-y-auto p-3 space-y-2">
         {sessions.length === 0 ? (
           <div className="text-center text-gray-500 py-6">
-            <p className="text-xs">No sessions yet</p>
-            <p className="text-xs mt-1 opacity-75">Create one to start!</p>
+            <p className="text-xs">{t('sidebar.noSessions')}</p>
+            <p className="text-xs mt-1 opacity-75">{t('sidebar.createToStart')}</p>
           </div>
         ) : (
           sessions.map((session) => (
@@ -69,7 +71,7 @@ export default function SessionSidebar() {
                   {session.name}
                 </h3>
                 <p className="text-xs text-gray-500 mt-0.5">
-                  {session.messages.length}msg • {session.nativeLanguage.slice(0,2)}→{session.learningLanguage.slice(0,2)}
+                  {t('sidebar.messagesCount', { count: session.messages.length })} • {session.nativeLanguage.slice(0,2)}→{session.learningLanguage.slice(0,2)}
                 </p>
               </div>
               <button
@@ -77,7 +79,7 @@ export default function SessionSidebar() {
                   e.stopPropagation();
                   if (
                     confirm(
-                      "Are you sure you want to delete this session? This action cannot be undone."
+                      t('sidebar.deleteConfirm')
                     )
                   ) {
                     deleteSession(session.id);

@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useLanguage } from "@/context/LanguageContext";
 import { useChatSession, type Message } from "@/context/ChatSessionContext";
+import { useClientTranslations } from "@/hooks/useClientTranslations";
 import { FaLanguage, FaVolumeUp } from "react-icons/fa";
 import ReactMarkdown from "react-markdown";
 
@@ -10,6 +11,7 @@ export default function ChatInterface() {
   const [input, setInput] = useState("");
   const { nativeLanguage, learningLanguage } = useLanguage();
   const { currentSession, updateCurrentSessionMessages } = useChatSession();
+  const { t } = useClientTranslations();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [loading, setLoading] = useState(false);
 
@@ -61,7 +63,7 @@ export default function ChatInterface() {
       console.error("Error sending message:", error);
       updateCurrentSessionMessages([
         ...updatedMessages,
-        { role: "model", parts: "An error occurred. Please try again." },
+        { role: "model", parts: t('chat.errorOccurred') },
       ]);
     } finally {
       setLoading(false);
@@ -116,7 +118,7 @@ export default function ChatInterface() {
       updateCurrentSessionMessages(updatedMessages);
     } catch (error) {
       console.error("Error translating text:", error);
-      updatedMessages[index].translatedText = "Translation failed.";
+      updatedMessages[index].translatedText = t('chat.translationFailed');
       updatedMessages[index].showTranslation = true;
       updateCurrentSessionMessages(updatedMessages);
     }
@@ -138,7 +140,7 @@ export default function ChatInterface() {
       utterance.lang = langMap[lang] || "en-US"; // Default to en-US if not found
       window.speechSynthesis.speak(utterance);
     } else {
-      alert("Text-to-speech not supported in your browser.");
+      alert(t('chat.ttsNotSupported'));
     }
   };
 
@@ -150,10 +152,10 @@ export default function ChatInterface() {
             <div className="space-y-4">
               <div className="text-6xl">💬</div>
               <h3 className="text-xl font-semibold text-gray-700">
-                Start Your Conversation
+                {t('chat.startConversation')}
               </h3>
               <p className="text-gray-500">
-                Type a message below to begin practicing your target language
+                {t('chat.typeMessage')}
               </p>
             </div>
           </div>
@@ -174,7 +176,7 @@ export default function ChatInterface() {
               >
                 <div className="flex items-center mb-2">
                   <span className="text-sm font-medium opacity-80">
-                    {msg.role === "user" ? "👤 You" : "🤖 AI Assistant"}
+                    {msg.role === "user" ? `👤 ${t('chat.you')}` : `🤖 ${t('chat.aiAssistant')}`}
                   </span>
                 </div>
                 <div className="text-sm leading-relaxed">
@@ -210,8 +212,8 @@ export default function ChatInterface() {
                         <FaLanguage size={12} />
                         <span>
                           {msg.showTranslation && msg.translatedText
-                            ? "Hide"
-                            : "Translate"}
+                            ? t('chat.hide')
+                            : t('chat.translate')}
                         </span>
                       </button>
                       <button
@@ -220,7 +222,7 @@ export default function ChatInterface() {
                         title="Play Audio"
                       >
                         <FaVolumeUp size={12} />
-                        <span>Listen</span>
+                        <span>{t('chat.listen')}</span>
                       </button>
                     </div>
                   </div>
@@ -228,7 +230,7 @@ export default function ChatInterface() {
                 {msg.showTranslation && msg.translatedText && (
                   <div className="mt-3 p-3 bg-white/80 rounded-lg border border-gray-200">
                     <p className="text-xs font-medium text-gray-600 mb-1">
-                      🌍 Translation:
+                      🌍 {t('chat.translation')}:
                     </p>
                     <p className="text-sm text-gray-700">
                       {msg.translatedText}
@@ -254,7 +256,7 @@ export default function ChatInterface() {
                     style={{ animationDelay: "0.2s" }}
                   ></div>
                 </div>
-                <span className="text-sm text-gray-600">AI is thinking...</span>
+                <span className="text-sm text-gray-600">{t('chat.aiThinking')}</span>
               </div>
             </div>
           </div>
@@ -266,7 +268,7 @@ export default function ChatInterface() {
           <input
             type="text"
             className="flex-grow px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white"
-            placeholder="Type your message in your target language..."
+            placeholder={t('chat.inputPlaceholder')}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => {
@@ -285,7 +287,7 @@ export default function ChatInterface() {
             onClick={sendMessage}
             disabled={loading || !input.trim()}
           >
-            {loading ? "Sending..." : "Send"}
+            {loading ? t('chat.sending') : t('chat.send')}
           </button>
         </div>
       </div>

@@ -1,0 +1,53 @@
+{
+  "app": {
+    "title": "LanLan",
+    "subtitle": "Language Learning Platform"
+  },
+  "home": {
+    "welcome": "Welcome to {appName}!",
+    "description": "Learn new languages interactively with AI-powered conversations. Practice speaking, get instant translations, and improve your skills naturally.",
+    "startLearning": "Start Learning Now",
+    "poweredBy": "Powered by Google Gemini AI"
+  },
+  "language": {
+    "nativeLanguage": "Your Native Language",
+    "learningLanguage": "Language to Learn",
+    "english": "English",
+    "japanese": "Japanese",
+    "spanish": "Spanish",
+    "french": "French",
+    "german": "German",
+    "chinese": "Chinese",
+    "korean": "Korean"
+  },
+  "sidebar": {
+    "sessions": "Sessions",
+    "newSession": "New",
+    "noSessions": "No sessions yet",
+    "createToStart": "Create one to start!",
+    "deleteConfirm": "Are you sure you want to delete this session? This action cannot be undone.",
+    "messagesCount": "{count}msg"
+  },
+  "chat": {
+    "title": "AI Language Practice",
+    "startConversation": "Start Your Conversation",
+    "typeMessage": "Type a message below to begin practicing your target language",
+    "inputPlaceholder": "Type your message in your target language...",
+    "send": "Send",
+    "sending": "Sending...",
+    "aiThinking": "AI is thinking...",
+    "you": "You",
+    "aiAssistant": "AI Assistant",
+    "translate": "Translate",
+    "hide": "Hide",
+    "listen": "Listen",
+    "translation": "Translation",
+    "errorOccurred": "An error occurred. Please try again.",
+    "translationFailed": "Translation failed.",
+    "ttsNotSupported": "Text-to-speech not supported in your browser."
+  },
+  "ui": {
+    "home": "Home",
+    "language": "Language"
+  }
+}

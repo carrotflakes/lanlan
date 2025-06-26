@@ -1,0 +1,53 @@
+{
+  "app": {
+    "title": "LanLan",
+    "subtitle": "言語学習プラットフォーム"
+  },
+  "home": {
+    "welcome": "{appName}へようこそ！",
+    "description": "AI搭載の対話で新しい言語をインタラクティブに学習しましょう。会話練習、瞬時翻訳、自然なスキル向上を体験できます。",
+    "startLearning": "今すぐ学習を始める",
+    "poweredBy": "Google Gemini AIを使用"
+  },
+  "language": {
+    "nativeLanguage": "母国語",
+    "learningLanguage": "学習言語",
+    "english": "英語",
+    "japanese": "日本語",
+    "spanish": "スペイン語",
+    "french": "フランス語",
+    "german": "ドイツ語",
+    "chinese": "中国語",
+    "korean": "韓国語"
+  },
+  "sidebar": {
+    "sessions": "セッション",
+    "newSession": "新規",
+    "noSessions": "セッションはありません",
+    "createToStart": "作成して開始！",
+    "deleteConfirm": "このセッションを削除してもよろしいですか？この操作は取り消せません。",
+    "messagesCount": "{count}件"
+  },
+  "chat": {
+    "title": "AI言語練習",
+    "startConversation": "会話を始めましょう",
+    "typeMessage": "下にメッセージを入力して、目標言語の練習を始めてください",
+    "inputPlaceholder": "目標言語でメッセージを入力してください...",
+    "send": "送信",
+    "sending": "送信中...",
+    "aiThinking": "AIが考え中...",
+    "you": "あなた",
+    "aiAssistant": "AIアシスタント",
+    "translate": "翻訳",
+    "hide": "非表示",
+    "listen": "聞く",
+    "translation": "翻訳",
+    "errorOccurred": "エラーが発生しました。もう一度お試しください。",
+    "translationFailed": "翻訳に失敗しました。",
+    "ttsNotSupported": "お使いのブラウザでは音声読み上げがサポートされていません。"
+  },
+  "ui": {
+    "home": "ホーム",
+    "language": "言語"
+  }
+}

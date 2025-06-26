@@ -1,0 +1,53 @@
+{
+  "app": {
+    "title": "LanLan",
+    "subtitle": "Plataforma de Aprendizaje de Idiomas"
+  },
+  "home": {
+    "welcome": "¡Bienvenido a {appName}!",
+    "description": "Aprende nuevos idiomas de forma interactiva con conversaciones impulsadas por IA. Practica hablando, obtén traducciones instantáneas y mejora tus habilidades de forma natural.",
+    "startLearning": "Comenzar a Aprender Ahora",
+    "poweredBy": "Impulsado por Google Gemini AI"
+  },
+  "language": {
+    "nativeLanguage": "Tu Idioma Nativo",
+    "learningLanguage": "Idioma a Aprender",
+    "english": "Inglés",
+    "japanese": "Japonés",
+    "spanish": "Español",
+    "french": "Francés",
+    "german": "Alemán",
+    "chinese": "Chino",
+    "korean": "Coreano"
+  },
+  "sidebar": {
+    "sessions": "Sesiones",
+    "newSession": "Nueva",
+    "noSessions": "Aún no hay sesiones",
+    "createToStart": "¡Crea una para empezar!",
+    "deleteConfirm": "¿Estás seguro de que quieres eliminar esta sesión? Esta acción no se puede deshacer.",
+    "messagesCount": "{count}msg"
+  },
+  "chat": {
+    "title": "Práctica de Idioma con IA",
+    "startConversation": "Comienza Tu Conversación",
+    "typeMessage": "Escribe un mensaje abajo para comenzar a practicar tu idioma objetivo",
+    "inputPlaceholder": "Escribe tu mensaje en tu idioma objetivo...",
+    "send": "Enviar",
+    "sending": "Enviando...",
+    "aiThinking": "La IA está pensando...",
+    "you": "Tú",
+    "aiAssistant": "Asistente IA",
+    "translate": "Traducir",
+    "hide": "Ocultar",
+    "listen": "Escuchar",
+    "translation": "Traducción",
+    "errorOccurred": "Ocurrió un error. Por favor, inténtalo de nuevo.",
+    "translationFailed": "La traducción falló.",
+    "ttsNotSupported": "La síntesis de voz no es compatible con tu navegador."
+  },
+  "ui": {
+    "home": "Inicio",
+    "language": "Idioma"
+  }
+}
