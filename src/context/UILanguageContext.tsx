@@ -12,6 +12,7 @@ const availableUILanguages = [
   { code: 'en', name: 'English', nativeName: 'English' },
   { code: 'ja', name: 'Japanese', nativeName: '日本語' },
   { code: 'es', name: 'Spanish', nativeName: 'Español' },
+  { code: 'zh', name: 'Chinese', nativeName: '中文' },
 ];
 
 const UILanguageContext = createContext<UILanguageContextType | undefined>(undefined);

@@ -1,0 +1,57 @@
+{
+  "app": {
+    "title": "LanLan",
+    "subtitle": "语言学习平台"
+  },
+  "home": {
+    "welcome": "欢迎使用{appName}！",
+    "description": "通过AI驱动的对话互动学习新语言。练习口语，获得即时翻译，自然提高语言技能。",
+    "startLearning": "立即开始学习",
+    "poweredBy": "由Google Gemini AI提供支持"
+  },
+  "language": {
+    "nativeLanguage": "您的母语",
+    "learningLanguage": "要学习的语言",
+    "english": "英语",
+    "japanese": "日语",
+    "spanish": "西班牙语",
+    "french": "法语",
+    "german": "德语",
+    "chinese": "中文",
+    "korean": "韩语"
+  },
+  "sidebar": {
+    "sessions": "会话",
+    "newSession": "新建",
+    "noSessions": "暂无会话",
+    "createToStart": "创建一个开始吧！",
+    "deleteConfirm": "确定要删除此会话吗？此操作无法撤销。",
+    "messagesCount": "{count}条"
+  },
+  "chat": {
+    "title": "AI语言练习",
+    "startConversation": "开始对话",
+    "typeMessage": "在下方输入消息开始练习目标语言",
+    "inputPlaceholder": "用目标语言输入您的消息...",
+    "send": "发送",
+    "sending": "发送中...",
+    "aiThinking": "AI思考中...",
+    "you": "您",
+    "aiAssistant": "AI助手",
+    "translate": "翻译",
+    "hide": "隐藏",
+    "listen": "听",
+    "translation": "翻译",
+    "errorOccurred": "发生错误，请重试。",
+    "translationFailed": "翻译失败。",
+    "ttsNotSupported": "您的浏览器不支持语音合成。"
+  },
+  "theme": {
+    "switchToDark": "切换到深色模式",
+    "switchToLight": "切换到浅色模式"
+  },
+  "ui": {
+    "home": "首页",
+    "language": "语言"
+  }
+}

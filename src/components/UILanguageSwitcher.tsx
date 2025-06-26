@@ -13,7 +13,7 @@ export default function UILanguageSwitcher() {
       <select
         value={uiLanguage}
         onChange={(e) => setUILanguage(e.target.value)}
-        className="text-xs bg-transparent border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500"
+        className="text-xs bg-transparent border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors duration-200"
         title={t('ui.language')}
       >
         {availableUILanguages.map((lang) => (
