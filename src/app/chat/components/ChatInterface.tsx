@@ -7,6 +7,17 @@ import { useClientTranslations } from "@/hooks/useClientTranslations";
 import { FaLanguage, FaVolumeUp } from "react-icons/fa";
 import ReactMarkdown from "react-markdown";
 
+// Language mapping for speech synthesis
+const LANGUAGE_MAP: { [key: string]: string } = {
+  English: "en-US",
+  Japanese: "ja-JP",
+  Spanish: "es-ES",
+  French: "fr-FR",
+  German: "de-DE",
+  Chinese: "zh-CN",
+  Korean: "ko-KR",
+};
+
 export default function ChatInterface() {
   const [input, setInput] = useState("");
   const { nativeLanguage, learningLanguage } = useLanguage();
@@ -37,9 +48,7 @@ export default function ChatInterface() {
     try {
       const response = await fetch("/api/chat", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           message: input,
           history: messages.map((msg) => ({
@@ -63,7 +72,7 @@ export default function ChatInterface() {
       console.error("Error sending message:", error);
       updateCurrentSessionMessages([
         ...updatedMessages,
-        { role: "model", parts: t('chat.errorOccurred') },
+        { role: "model", parts: t("chat.errorOccurred") },
       ]);
     } finally {
       setLoading(false);
@@ -74,33 +83,28 @@ export default function ChatInterface() {
     if (!currentSession) return;
 
     const updatedMessages = [...currentSession.messages];
-    if (
-      updatedMessages[index].translatedText &&
-      updatedMessages[index].showTranslation
-    ) {
-      // If already translated and shown, just hide it
-      updatedMessages[index].showTranslation = false;
+    const message = updatedMessages[index];
+
+    // Toggle translation visibility if already translated
+    if (message.translatedText) {
+      message.showTranslation = !message.showTranslation;
       updateCurrentSessionMessages(updatedMessages);
       return;
     }
 
-    if (
-      updatedMessages[index].translatedText &&
-      !updatedMessages[index].showTranslation
-    ) {
-      // If already translated but hidden, just show it
-      updatedMessages[index].showTranslation = true;
-      updateCurrentSessionMessages(updatedMessages);
-      return;
-    }
+    // Fetch translation if not available
+    await fetchTranslation(index, textToTranslate, updatedMessages);
+  };
 
-    // If not translated yet, fetch translation
+  const fetchTranslation = async (
+    index: number,
+    textToTranslate: string,
+    updatedMessages: Message[]
+  ) => {
     try {
       const response = await fetch("/api/translate", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           text: textToTranslate,
           sourceLanguage: learningLanguage,
@@ -118,7 +122,7 @@ export default function ChatInterface() {
       updateCurrentSessionMessages(updatedMessages);
     } catch (error) {
       console.error("Error translating text:", error);
-      updatedMessages[index].translatedText = t('chat.translationFailed');
+      updatedMessages[index].translatedText = t("chat.translationFailed");
       updatedMessages[index].showTranslation = true;
       updateCurrentSessionMessages(updatedMessages);
     }
@@ -127,20 +131,10 @@ export default function ChatInterface() {
   const handleSpeak = (text: string, lang: string) => {
     if ("speechSynthesis" in window) {
       const utterance = new SpeechSynthesisUtterance(text);
-      // Map common language names to BCP 47 language tags
-      const langMap: { [key: string]: string } = {
-        English: "en-US",
-        Japanese: "ja-JP",
-        Spanish: "es-ES",
-        French: "fr-FR",
-        German: "de-DE",
-        Chinese: "zh-CN",
-        Korean: "ko-KR",
-      };
-      utterance.lang = langMap[lang] || "en-US"; // Default to en-US if not found
+      utterance.lang = LANGUAGE_MAP[lang] || "en-US";
       window.speechSynthesis.speak(utterance);
     } else {
-      alert(t('chat.ttsNotSupported'));
+      alert(t("chat.ttsNotSupported"));
     }
   };
 
@@ -152,93 +146,24 @@ export default function ChatInterface() {
             <div className="space-y-3 sm:space-y-4 px-4">
               <div className="text-4xl sm:text-6xl">💬</div>
               <h3 className="text-lg sm:text-xl font-semibold text-gray-700">
-                {t('chat.startConversation')}
+                {t("chat.startConversation")}
               </h3>
               <p className="text-sm sm:text-base text-gray-500">
-                {t('chat.typeMessage')}
+                {t("chat.typeMessage")}
               </p>
             </div>
           </div>
         ) : (
           messages.map((msg, index) => (
-            <div
+            <MessageBubble
               key={index}
-              className={`flex ${
-                msg.role === "user" ? "justify-end" : "justify-start"
-              } mb-3 sm:mb-4`}
-            >
-              <div
-                className={`max-w-[85%] sm:max-w-[75%] rounded-xl sm:rounded-2xl px-3 sm:px-4 py-2 sm:py-3 ${
-                  msg.role === "user"
-                    ? "bg-gradient-to-r from-blue-500 to-indigo-600 text-white"
-                    : "bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200"
-                }`}
-              >
-                <div className="flex items-center mb-1 sm:mb-2">
-                  <span className="text-xs sm:text-sm font-medium opacity-80">
-                    {msg.role === "user" ? `👤 ${t('chat.you')}` : `🤖 ${t('chat.aiAssistant')}`}
-                  </span>
-                </div>
-                <div className="text-sm sm:text-base leading-relaxed">
-                  {msg.role === "model" ? (
-                    <ReactMarkdown
-                      components={{
-                        p: ({ children }) => (
-                          <p className="mb-2 last:mb-0">{children}</p>
-                        ),
-                        strong: ({ children }) => (
-                          <strong className="font-semibold">{children}</strong>
-                        ),
-                      }}
-                    >
-                      {msg.parts}
-                    </ReactMarkdown>
-                  ) : (
-                    <p>{msg.parts}</p>
-                  )}
-                </div>
-                {msg.role === "model" && (
-                  <div className="flex items-center justify-start mt-2 sm:mt-3 pt-2 border-t border-gray-200">
-                    <div className="flex items-center space-x-2 sm:space-x-3">
-                      <button
-                        className="flex items-center space-x-1 text-xs px-2 sm:px-3 py-1 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-full transition-colors duration-200"
-                        onClick={() => handleTranslate(index, msg.parts)}
-                        title={
-                          msg.showTranslation && msg.translatedText
-                            ? "Hide Translation"
-                            : "Show Translation"
-                        }
-                      >
-                        <FaLanguage size={12} />
-                        <span>
-                          {msg.showTranslation && msg.translatedText
-                            ? t('chat.hide')
-                            : t('chat.translate')}
-                        </span>
-                      </button>
-                      <button
-                        className="flex items-center space-x-1 text-xs px-2 sm:px-3 py-1 bg-green-50 hover:bg-green-100 text-green-600 rounded-full transition-colors duration-200"
-                        onClick={() => handleSpeak(msg.parts, learningLanguage)}
-                        title="Play Audio"
-                      >
-                        <FaVolumeUp size={12} />
-                        <span>{t('chat.listen')}</span>
-                      </button>
-                    </div>
-                  </div>
-                )}
-                {msg.showTranslation && msg.translatedText && (
-                  <div className="mt-3 p-3 bg-white/80 rounded-lg border border-gray-200">
-                    <p className="text-xs font-medium text-gray-600 mb-1">
-                      🌍 {t('chat.translation')}:
-                    </p>
-                    <p className="text-sm text-gray-700">
-                      {msg.translatedText}
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
+              msg={msg}
+              index={index}
+              onTranslate={handleTranslate}
+              onSpeak={handleSpeak}
+              learningLanguage={learningLanguage}
+              t={t}
+            />
           ))
         )}
         {loading && (
@@ -256,7 +181,9 @@ export default function ChatInterface() {
                     style={{ animationDelay: "0.2s" }}
                   ></div>
                 </div>
-                <span className="text-sm text-gray-600">{t('chat.aiThinking')}</span>
+                <span className="text-sm text-gray-600">
+                  {t("chat.aiThinking")}
+                </span>
               </div>
             </div>
           </div>
@@ -268,7 +195,7 @@ export default function ChatInterface() {
           <input
             type="text"
             className="flex-grow px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border-2 border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white"
-            placeholder={t('chat.inputPlaceholder')}
+            placeholder={t("chat.inputPlaceholder")}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => {
@@ -287,10 +214,127 @@ export default function ChatInterface() {
             onClick={sendMessage}
             disabled={loading || !input.trim()}
           >
-            {loading ? t('chat.sending') : t('chat.send')}
+            {loading ? t("chat.sending") : t("chat.send")}
           </button>
         </div>
       </div>
     </div>
   );
 }
+
+// Common CSS classes
+const BUTTON_BASE_CLASSES =
+  "flex items-center space-x-1 text-xs px-2 sm:px-3 py-1 rounded-full transition-colors duration-200";
+const TRANSLATE_BUTTON_CLASSES = `${BUTTON_BASE_CLASSES} bg-blue-50 hover:bg-blue-100 text-blue-600`;
+const SPEAK_BUTTON_CLASSES = `${BUTTON_BASE_CLASSES} bg-green-50 hover:bg-green-100 text-green-600`;
+
+// Message Action Button Component
+const MessageActionButton = ({
+  onClick,
+  icon,
+  text,
+  className,
+  title,
+}: {
+  onClick: () => void;
+  icon: React.ReactNode;
+  text: string;
+  className: string;
+  title: string;
+}) => (
+  <button className={className} onClick={onClick} title={title}>
+    {icon}
+    <span>{text}</span>
+  </button>
+);
+
+// Individual Message Component
+const MessageBubble = ({
+  msg,
+  index,
+  onTranslate,
+  onSpeak,
+  learningLanguage,
+  t,
+}: {
+  msg: Message;
+  index: number;
+  onTranslate: (index: number, text: string) => void;
+  onSpeak: (text: string, lang: string) => void;
+  learningLanguage: string;
+  t: (key: string) => string;
+}) => (
+  <div
+    className={`flex ${
+      msg.role === "user" ? "justify-end" : "justify-start"
+    } mb-3 sm:mb-4`}
+  >
+    <div
+      className={`max-w-[85%] sm:max-w-[75%] rounded-xl sm:rounded-2xl px-3 sm:px-4 py-2 sm:py-3 ${
+        msg.role === "user"
+          ? "bg-gradient-to-r from-blue-500 to-indigo-600 text-white"
+          : "bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200"
+      }`}
+    >
+      <div className="flex items-center mb-1 sm:mb-2">
+        <span className="text-xs sm:text-sm font-medium opacity-80">
+          {msg.role === "user"
+            ? `👤 ${t("chat.you")}`
+            : `🤖 ${t("chat.aiAssistant")}`}
+        </span>
+      </div>
+      <div className="text-sm sm:text-base leading-relaxed">
+        {msg.role === "model" ? (
+          <ReactMarkdown
+            components={{
+              p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+              strong: ({ children }) => (
+                <strong className="font-semibold">{children}</strong>
+              ),
+            }}
+          >
+            {msg.parts}
+          </ReactMarkdown>
+        ) : (
+          <p>{msg.parts}</p>
+        )}
+      </div>
+      {msg.role === "model" && (
+        <div className="flex items-center justify-start mt-2 sm:mt-3 pt-2 border-t border-gray-200">
+          <div className="flex items-center space-x-2 sm:space-x-3">
+            <MessageActionButton
+              onClick={() => onTranslate(index, msg.parts)}
+              icon={<FaLanguage size={12} />}
+              text={
+                msg.showTranslation && msg.translatedText
+                  ? t("chat.hide")
+                  : t("chat.translate")
+              }
+              className={TRANSLATE_BUTTON_CLASSES}
+              title={
+                msg.showTranslation && msg.translatedText
+                  ? "Hide Translation"
+                  : "Show Translation"
+              }
+            />
+            <MessageActionButton
+              onClick={() => onSpeak(msg.parts, learningLanguage)}
+              icon={<FaVolumeUp size={12} />}
+              text={t("chat.listen")}
+              className={SPEAK_BUTTON_CLASSES}
+              title="Play Audio"
+            />
+          </div>
+        </div>
+      )}
+      {msg.showTranslation && msg.translatedText && (
+        <div className="mt-3 p-3 bg-white/80 rounded-lg border border-gray-200">
+          <p className="text-xs font-medium text-gray-600 mb-1">
+            🌍 {t("chat.translation")}:
+          </p>
+          <p className="text-sm text-gray-700">{msg.translatedText}</p>
+        </div>
+      )}
+    </div>
+  </div>
+);
