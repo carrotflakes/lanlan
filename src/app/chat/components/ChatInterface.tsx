@@ -453,6 +453,8 @@ function AIText({
   text: string;
   annotations?: { word: string; explanation: string }[];
 }) {
+  const [activeTooltip, setActiveTooltip] = useState<number | null>(null);
+
   const parts: (string | { word: string; explanation: string })[] =
     useMemo(() => {
       if (!annotations) return [text];
@@ -481,6 +483,10 @@ function AIText({
       return parts;
     }, [text, annotations]);
 
+  const handleTooltipToggle = (index: number) => {
+    setActiveTooltip(activeTooltip === index ? null : index);
+  };
+
   return (
     <div className="text-gray-800 dark:text-gray-200">
       {parts.map((part, index) =>
@@ -492,9 +498,12 @@ function AIText({
           <span
             key={index}
             className="underline decoration-yellow-500 decoration-2 decoration-dotted cursor-help relative group"
+            onClick={() => handleTooltipToggle(index)}
           >
             {part.word}
-            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-10">
+            <div className={`absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg shadow-lg transition-opacity duration-200 z-10 ${
+              activeTooltip === index ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+            }`}>
               <div className="max-w-xl break-keep">{part.explanation}</div>
               <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
             </div>
