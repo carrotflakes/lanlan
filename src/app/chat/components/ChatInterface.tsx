@@ -44,9 +44,14 @@ export default function ChatInterface() {
     return updatedMessages;
   };
 
-  const updateMessage = (index: number, updates: Partial<Message>) => {
-    if (!currentSession || index < 0 || index >= messages.length) return messages;
-    const updatedMessages = messages.map((msg, i) =>
+  const updateMessage = (
+    index: number,
+    updates: Partial<Message>,
+    currentMessages: Message[] = messages
+  ) => {
+    if (!currentSession || index < 0 || index >= currentMessages.length)
+      return currentMessages;
+    const updatedMessages = currentMessages.map((msg, i) =>
       i === index ? { ...msg, ...updates } : msg
     );
     updateCurrentSessionMessages(updatedMessages);
@@ -86,14 +91,18 @@ export default function ChatInterface() {
 
       // Fetch annotations asynchronously
       const modelMessageIndex = messagesWithModel.length - 1;
-      fetchAnnotationsForMessage(modelMessageIndex, data.response, false);
-
+      fetchAnnotationsForMessage(
+        modelMessageIndex,
+        data.response,
+        false,
+        messagesWithModel
+      );
     } catch (error) {
       console.error("Error sending message:", error);
       // Add error message
-      const errorMessage: Message = { 
-        role: "model", 
-        parts: apiService.handleApiError(error, t("chat.errorOccurred"))
+      const errorMessage: Message = {
+        role: "model",
+        parts: apiService.handleApiError(error, t("chat.errorOccurred")),
       };
       addMessage(errorMessage);
     } finally {
@@ -116,7 +125,10 @@ export default function ChatInterface() {
     await fetchTranslationForMessage(index, textToTranslate);
   };
 
-  const fetchTranslationForMessage = async (index: number, textToTranslate: string) => {
+  const fetchTranslationForMessage = async (
+    index: number,
+    textToTranslate: string
+  ) => {
     try {
       const data = await apiService.translation.translateText({
         text: textToTranslate,
@@ -126,13 +138,16 @@ export default function ChatInterface() {
 
       updateMessage(index, {
         translatedText: data.translatedText,
-        showTranslation: true
+        showTranslation: true,
       });
     } catch (error) {
       console.error("Error translating text:", error);
       updateMessage(index, {
-        translatedText: apiService.handleApiError(error, t("chat.translationFailed")),
-        showTranslation: true
+        translatedText: apiService.handleApiError(
+          error,
+          t("chat.translationFailed")
+        ),
+        showTranslation: true,
       });
     }
   };
@@ -149,13 +164,14 @@ export default function ChatInterface() {
     }
 
     // Fetch annotations if not available
-    await fetchAnnotationsForMessage(index, textToAnnotate, true);
+    await fetchAnnotationsForMessage(index, textToAnnotate, true, messages);
   };
 
   const fetchAnnotationsForMessage = async (
     index: number,
     textToAnnotate: string,
-    showAnnotations: boolean = false
+    showAnnotations: boolean,
+    currentMessages: Message[] = messages
   ) => {
     try {
       const data = await apiService.annotation.getAnnotations({
@@ -164,16 +180,24 @@ export default function ChatInterface() {
         explanationLanguage: nativeLanguage,
       });
 
-      updateMessage(index, {
-        annotations: data.annotations,
-        showAnnotations: showAnnotations
-      });
+      updateMessage(
+        index,
+        {
+          annotations: data.annotations,
+          showAnnotations: showAnnotations,
+        },
+        currentMessages
+      );
     } catch (error) {
       console.error("Error fetching annotations:", error);
-      updateMessage(index, {
-        annotations: [],
-        showAnnotations: false
-      });
+      updateMessage(
+        index,
+        {
+          annotations: [],
+          showAnnotations: false,
+        },
+        currentMessages
+      );
     }
   };
 
@@ -461,7 +485,9 @@ function AIText({
     <div className="text-gray-800 dark:text-gray-200">
       {parts.map((part, index) =>
         typeof part === "string" ? (
-          <span key={index} className="whitespace-pre-wrap">{part}</span>
+          <span key={index} className="whitespace-pre-wrap">
+            {part}
+          </span>
         ) : (
           <span
             key={index}
