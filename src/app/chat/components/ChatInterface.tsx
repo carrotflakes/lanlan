@@ -5,6 +5,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import { useChatSession, type Message } from "@/context/ChatSessionContext";
 import { useClientTranslations } from "@/hooks/useClientTranslations";
 import { FaLanguage, FaVolumeUp, FaLightbulb } from "react-icons/fa";
+import { apiService } from "@/services/api";
 
 // Language mapping for speech synthesis
 const LANGUAGE_MAP: { [key: string]: string } = {
@@ -35,54 +36,66 @@ export default function ChatInterface() {
     scrollToBottom();
   }, [messages]);
 
+  // Message update utilities for immutable state management
+  const addMessage = (message: Message) => {
+    if (!currentSession) return null;
+    const updatedMessages = [...messages, message];
+    updateCurrentSessionMessages(updatedMessages);
+    return updatedMessages;
+  };
+
+  const updateMessage = (index: number, updates: Partial<Message>) => {
+    if (!currentSession || index < 0 || index >= messages.length) return messages;
+    const updatedMessages = messages.map((msg, i) =>
+      i === index ? { ...msg, ...updates } : msg
+    );
+    updateCurrentSessionMessages(updatedMessages);
+    return updatedMessages;
+  };
+
   const sendMessage = async () => {
     if (!input.trim() || !currentSession) return;
 
-    const userMessage: Message = { role: "user", parts: input };
-    const updatedMessages = [...messages, userMessage];
-    updateCurrentSessionMessages(updatedMessages);
+    const userInput = input;
     setInput("");
     setLoading(true);
 
     try {
-      const response = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          message: input,
-          history: messages.map((msg) => ({
-            role: msg.role,
-            parts: msg.parts,
-          })),
-          nativeLanguage,
-          learningLanguage,
-        }),
+      // Add user message
+      const userMessage: Message = { role: "user", parts: userInput };
+      const messagesWithUser = addMessage(userMessage);
+      if (!messagesWithUser) throw new Error("Failed to add user message");
+
+      // Send to AI
+      const data = await apiService.chat.sendMessage({
+        message: userInput,
+        history: messages.map((msg) => ({
+          role: msg.role,
+          parts: msg.parts,
+        })),
+        nativeLanguage,
+        learningLanguage,
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
+      // Add AI message
       const modelMessage: Message = { role: "model", parts: data.response };
-      const messagesWithModel = [...updatedMessages, modelMessage];
+      const messagesWithModel = [...messagesWithUser, modelMessage];
       updateCurrentSessionMessages(messagesWithModel);
-      handleSpeak(data.response, learningLanguage); // Automatically play audio
 
-      // Automatically fetch annotations for the AI response
-      const messageIndex = messagesWithModel.length - 1;
-      await fetchAnnotations(
-        messageIndex,
-        data.response,
-        messagesWithModel,
-        false
-      );
+      handleSpeak(data.response, learningLanguage);
+
+      // Fetch annotations asynchronously
+      const modelMessageIndex = messagesWithModel.length - 1;
+      fetchAnnotationsForMessage(modelMessageIndex, data.response, false);
+
     } catch (error) {
       console.error("Error sending message:", error);
-      updateCurrentSessionMessages([
-        ...updatedMessages,
-        { role: "model", parts: t("chat.errorOccurred") },
-      ]);
+      // Add error message
+      const errorMessage: Message = { 
+        role: "model", 
+        parts: apiService.handleApiError(error, t("chat.errorOccurred"))
+      };
+      addMessage(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -91,99 +104,76 @@ export default function ChatInterface() {
   const handleTranslate = async (index: number, textToTranslate: string) => {
     if (!currentSession) return;
 
-    const updatedMessages = [...currentSession.messages];
-    const message = updatedMessages[index];
+    const message = messages[index];
 
     // Toggle translation visibility if already translated
     if (message.translatedText) {
-      message.showTranslation = !message.showTranslation;
-      updateCurrentSessionMessages(updatedMessages);
+      updateMessage(index, { showTranslation: !message.showTranslation });
       return;
     }
 
     // Fetch translation if not available
-    await fetchTranslation(index, textToTranslate, updatedMessages);
+    await fetchTranslationForMessage(index, textToTranslate);
   };
 
-  const fetchTranslation = async (
-    index: number,
-    textToTranslate: string,
-    updatedMessages: Message[]
-  ) => {
+  const fetchTranslationForMessage = async (index: number, textToTranslate: string) => {
     try {
-      const response = await fetch("/api/translate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          text: textToTranslate,
-          sourceLanguage: learningLanguage,
-          targetLanguage: nativeLanguage,
-        }),
+      const data = await apiService.translation.translateText({
+        text: textToTranslate,
+        sourceLanguage: learningLanguage,
+        targetLanguage: nativeLanguage,
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      updatedMessages[index].translatedText = data.translatedText;
-      updatedMessages[index].showTranslation = true;
-      updateCurrentSessionMessages(updatedMessages);
+      updateMessage(index, {
+        translatedText: data.translatedText,
+        showTranslation: true
+      });
     } catch (error) {
       console.error("Error translating text:", error);
-      updatedMessages[index].translatedText = t("chat.translationFailed");
-      updatedMessages[index].showTranslation = true;
-      updateCurrentSessionMessages(updatedMessages);
+      updateMessage(index, {
+        translatedText: apiService.handleApiError(error, t("chat.translationFailed")),
+        showTranslation: true
+      });
     }
   };
 
   const handleAnnotate = async (index: number, textToAnnotate: string) => {
     if (!currentSession) return;
 
-    const updatedMessages = [...currentSession.messages];
-    const message = updatedMessages[index];
+    const message = messages[index];
 
     // Toggle annotation visibility if already annotated
     if (message.annotations) {
-      message.showAnnotations = !message.showAnnotations;
-      updateCurrentSessionMessages(updatedMessages);
+      updateMessage(index, { showAnnotations: !message.showAnnotations });
       return;
     }
 
     // Fetch annotations if not available
-    await fetchAnnotations(index, textToAnnotate, updatedMessages, true);
+    await fetchAnnotationsForMessage(index, textToAnnotate, true);
   };
 
-  const fetchAnnotations = async (
+  const fetchAnnotationsForMessage = async (
     index: number,
     textToAnnotate: string,
-    updatedMessages: Message[],
-    showAnnotations: boolean
+    showAnnotations: boolean = false
   ) => {
     try {
-      const response = await fetch("/api/annotation", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          text: textToAnnotate,
-          language: learningLanguage,
-          explanationLanguage: nativeLanguage,
-        }),
+      const data = await apiService.annotation.getAnnotations({
+        text: textToAnnotate,
+        language: learningLanguage,
+        explanationLanguage: nativeLanguage,
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      updatedMessages[index].annotations = data.annotations;
-      updatedMessages[index].showAnnotations = showAnnotations;
-      updateCurrentSessionMessages(updatedMessages);
+      updateMessage(index, {
+        annotations: data.annotations,
+        showAnnotations: showAnnotations
+      });
     } catch (error) {
       console.error("Error fetching annotations:", error);
-      updatedMessages[index].annotations = [];
-      updatedMessages[index].showAnnotations = false;
-      updateCurrentSessionMessages(updatedMessages);
+      updateMessage(index, {
+        annotations: [],
+        showAnnotations: false
+      });
     }
   };
 
@@ -471,7 +461,7 @@ function AIText({
     <div className="text-gray-800 dark:text-gray-200">
       {parts.map((part, index) =>
         typeof part === "string" ? (
-          <span key={index}>{part}</span>
+          <span key={index} className="whitespace-pre-wrap">{part}</span>
         ) : (
           <span
             key={index}

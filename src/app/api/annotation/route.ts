@@ -49,7 +49,7 @@ export async function POST(req: Request) {
       }
     });
 
-    const prompt = `You are an assistant for language learners. The user is learning ${language} and needs help understanding important words and phrases in the text provided. Your task is to analyze the text and extract key words, phrases, and idiomatic expressions.
+    const prompt = `You are an assistant for language learners. The user is learning ${language} and needs help understanding important words and idioms in the text provided. Your task is to analyze the text and extract key words, phrases, and idiomatic expressions.
 
 For each important word, phrase, or idiom, provide:
 1. The word/phrase exactly as it appears in the original text (preserve the exact form, conjugation, and inflection)
