@@ -39,9 +39,11 @@
     "you": "You",
     "aiAssistant": "AI Assistant",
     "translate": "Translate",
+    "annotate": "Annotate",
     "hide": "Hide",
     "listen": "Listen",
     "translation": "Translation",
+    "annotations": "Annotations",
     "errorOccurred": "An error occurred. Please try again.",
     "translationFailed": "Translation failed.",
     "ttsNotSupported": "Text-to-speech not supported in your browser."

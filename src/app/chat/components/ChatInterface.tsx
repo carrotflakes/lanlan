@@ -1,11 +1,10 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import { useLanguage } from "@/context/LanguageContext";
 import { useChatSession, type Message } from "@/context/ChatSessionContext";
 import { useClientTranslations } from "@/hooks/useClientTranslations";
-import { FaLanguage, FaVolumeUp } from "react-icons/fa";
-import ReactMarkdown from "react-markdown";
+import { FaLanguage, FaVolumeUp, FaLightbulb } from "react-icons/fa";
 
 // Language mapping for speech synthesis
 const LANGUAGE_MAP: { [key: string]: string } = {
@@ -66,8 +65,18 @@ export default function ChatInterface() {
 
       const data = await response.json();
       const modelMessage: Message = { role: "model", parts: data.response };
-      updateCurrentSessionMessages([...updatedMessages, modelMessage]);
+      const messagesWithModel = [...updatedMessages, modelMessage];
+      updateCurrentSessionMessages(messagesWithModel);
       handleSpeak(data.response, learningLanguage); // Automatically play audio
+
+      // Automatically fetch annotations for the AI response
+      const messageIndex = messagesWithModel.length - 1;
+      await fetchAnnotations(
+        messageIndex,
+        data.response,
+        messagesWithModel,
+        false
+      );
     } catch (error) {
       console.error("Error sending message:", error);
       updateCurrentSessionMessages([
@@ -128,6 +137,56 @@ export default function ChatInterface() {
     }
   };
 
+  const handleAnnotate = async (index: number, textToAnnotate: string) => {
+    if (!currentSession) return;
+
+    const updatedMessages = [...currentSession.messages];
+    const message = updatedMessages[index];
+
+    // Toggle annotation visibility if already annotated
+    if (message.annotations) {
+      message.showAnnotations = !message.showAnnotations;
+      updateCurrentSessionMessages(updatedMessages);
+      return;
+    }
+
+    // Fetch annotations if not available
+    await fetchAnnotations(index, textToAnnotate, updatedMessages, true);
+  };
+
+  const fetchAnnotations = async (
+    index: number,
+    textToAnnotate: string,
+    updatedMessages: Message[],
+    showAnnotations: boolean
+  ) => {
+    try {
+      const response = await fetch("/api/annotation", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          text: textToAnnotate,
+          language: learningLanguage,
+          explanationLanguage: nativeLanguage,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      updatedMessages[index].annotations = data.annotations;
+      updatedMessages[index].showAnnotations = showAnnotations;
+      updateCurrentSessionMessages(updatedMessages);
+    } catch (error) {
+      console.error("Error fetching annotations:", error);
+      updatedMessages[index].annotations = [];
+      updatedMessages[index].showAnnotations = false;
+      updateCurrentSessionMessages(updatedMessages);
+    }
+  };
+
   const handleSpeak = (text: string, lang: string) => {
     if ("speechSynthesis" in window) {
       const utterance = new SpeechSynthesisUtterance(text);
@@ -160,6 +219,7 @@ export default function ChatInterface() {
               msg={msg}
               index={index}
               onTranslate={handleTranslate}
+              onAnnotate={handleAnnotate}
               onSpeak={handleSpeak}
               learningLanguage={learningLanguage}
               t={t}
@@ -227,6 +287,7 @@ const BUTTON_BASE_CLASSES =
   "flex items-center space-x-1 text-xs px-2 sm:px-3 py-1 rounded-full transition-colors duration-200";
 const TRANSLATE_BUTTON_CLASSES = `${BUTTON_BASE_CLASSES} bg-blue-50 hover:bg-blue-100 text-blue-600`;
 const SPEAK_BUTTON_CLASSES = `${BUTTON_BASE_CLASSES} bg-green-50 hover:bg-green-100 text-green-600`;
+const ANNOTATE_BUTTON_CLASSES = `${BUTTON_BASE_CLASSES} bg-yellow-50 hover:bg-yellow-100 text-yellow-600`;
 
 // Message Action Button Component
 const MessageActionButton = ({
@@ -253,6 +314,7 @@ const MessageBubble = ({
   msg,
   index,
   onTranslate,
+  onAnnotate,
   onSpeak,
   learningLanguage,
   t,
@@ -260,6 +322,7 @@ const MessageBubble = ({
   msg: Message;
   index: number;
   onTranslate: (index: number, text: string) => void;
+  onAnnotate: (index: number, text: string) => void;
   onSpeak: (text: string, lang: string) => void;
   learningLanguage: string;
   t: (key: string) => string;
@@ -285,16 +348,7 @@ const MessageBubble = ({
       </div>
       <div className="text-sm sm:text-base leading-relaxed">
         {msg.role === "model" ? (
-          <ReactMarkdown
-            components={{
-              p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
-              strong: ({ children }) => (
-                <strong className="font-semibold">{children}</strong>
-              ),
-            }}
-          >
-            {msg.parts}
-          </ReactMarkdown>
+          <AIText text={msg.parts} annotations={msg.annotations} />
         ) : (
           <p>{msg.parts}</p>
         )}
@@ -318,6 +372,21 @@ const MessageBubble = ({
               }
             />
             <MessageActionButton
+              onClick={() => onAnnotate(index, msg.parts)}
+              icon={<FaLightbulb size={12} />}
+              text={
+                msg.showAnnotations && msg.annotations
+                  ? t("chat.hide")
+                  : t("chat.annotate")
+              }
+              className={ANNOTATE_BUTTON_CLASSES}
+              title={
+                msg.showAnnotations && msg.annotations
+                  ? "Hide Annotations"
+                  : "Show Annotations"
+              }
+            />
+            <MessageActionButton
               onClick={() => onSpeak(msg.parts, learningLanguage)}
               icon={<FaVolumeUp size={12} />}
               text={t("chat.listen")}
@@ -335,6 +404,87 @@ const MessageBubble = ({
           <p className="text-sm text-gray-700">{msg.translatedText}</p>
         </div>
       )}
+      {msg.showAnnotations && msg.annotations && (
+        <div className="mt-3 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+          <p className="text-xs font-medium text-yellow-700 mb-2">
+            💡 {t("chat.annotations")}:
+          </p>
+          <div className="space-y-2">
+            {msg.annotations.map(
+              (
+                annotation: { word: string; explanation: string },
+                idx: number
+              ) => (
+                <div key={idx} className="text-sm">
+                  <span className="font-semibold text-yellow-800">
+                    {annotation.word}
+                  </span>
+                  <span className="text-yellow-700 ml-2">
+                    - {annotation.explanation}
+                  </span>
+                </div>
+              )
+            )}
+          </div>
+        </div>
+      )}
     </div>
   </div>
 );
+
+function AIText({
+  text,
+  annotations,
+}: {
+  text: string;
+  annotations?: { word: string; explanation: string }[];
+}) {
+  const parts: (string | { word: string; explanation: string })[] =
+    useMemo(() => {
+      if (!annotations) return [text];
+
+      const parts = [];
+      let lastIndex = 0;
+      while (lastIndex < text.length) {
+        let ann: { word: string; explanation: string } | undefined;
+        let annIndex = text.length;
+        for (const annotation of annotations) {
+          const findIndex = text.indexOf(annotation.word, lastIndex);
+          if (findIndex !== -1 && findIndex < annIndex) {
+            annIndex = findIndex;
+            ann = annotation;
+          }
+        }
+        if (ann) {
+          parts.push(text.slice(lastIndex, annIndex));
+          parts.push(ann);
+          lastIndex = annIndex + ann.word.length;
+        } else {
+          parts.push(text.slice(lastIndex));
+          break;
+        }
+      }
+      return parts;
+    }, [text, annotations]);
+
+  return (
+    <div className="text-gray-800 dark:text-gray-200">
+      {parts.map((part, index) =>
+        typeof part === "string" ? (
+          <span key={index}>{part}</span>
+        ) : (
+          <span
+            key={index}
+            className="underline decoration-yellow-500 decoration-2 decoration-dotted cursor-help relative group"
+          >
+            {part.word}
+            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-10">
+              <div className="max-w-xl break-keep">{part.explanation}</div>
+              <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
+            </div>
+          </span>
+        )
+      )}
+    </div>
+  );
+}

@@ -9,11 +9,18 @@ import React, {
 } from "react";
 import { v4 as uuidv4 } from "uuid";
 
+export interface Annotation {
+  word: string;
+  explanation: string;
+}
+
 export interface Message {
   role: "user" | "model";
   parts: string;
   translatedText?: string;
   showTranslation?: boolean;
+  annotations?: Annotation[];
+  showAnnotations?: boolean;
 }
 
 interface ChatSession {

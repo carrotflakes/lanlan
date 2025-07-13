@@ -39,9 +39,11 @@
     "you": "Tú",
     "aiAssistant": "Asistente IA",
     "translate": "Traducir",
+    "annotate": "Anotar",
     "hide": "Ocultar",
     "listen": "Escuchar",
     "translation": "Traducción",
+    "annotations": "Anotaciones",
     "errorOccurred": "Ocurrió un error. Por favor, inténtalo de nuevo.",
     "translationFailed": "La traducción falló.",
     "ttsNotSupported": "La síntesis de voz no es compatible con tu navegador."

@@ -39,9 +39,11 @@
     "you": "あなた",
     "aiAssistant": "AIアシスタント",
     "translate": "翻訳",
+    "annotate": "注釈",
     "hide": "非表示",
     "listen": "聞く",
     "translation": "翻訳",
+    "annotations": "注釈",
     "errorOccurred": "エラーが発生しました。もう一度お試しください。",
     "translationFailed": "翻訳に失敗しました。",
     "ttsNotSupported": "お使いのブラウザでは音声読み上げがサポートされていません。"

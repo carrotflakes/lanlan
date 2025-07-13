@@ -39,9 +39,11 @@
     "you": "您",
     "aiAssistant": "AI助手",
     "translate": "翻译",
+    "annotate": "注释",
     "hide": "隐藏",
     "listen": "听",
     "translation": "翻译",
+    "annotations": "注释",
     "errorOccurred": "发生错误，请重试。",
     "translationFailed": "翻译失败。",
     "ttsNotSupported": "您的浏览器不支持语音合成。"

@@ -17,6 +17,7 @@ export async function POST(req: Request) {
     });
 
     const prompt = `You are a language learning assistant. Your goal is to help the user practice ${learningLanguage}. The user's native language is ${nativeLanguage}. Respond only in ${learningLanguage} unless the user explicitly asks for a translation or explanation in their native language. Keep responses concise and focused on language practice.
+Just respond in plain text (line breaks are allowed) without any additional formatting or explanation.
 
 User: ${message}`;
 
