@@ -10,7 +10,7 @@ export async function POST(req: Request) {
     }
 
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY as string);
-    const model = genAI.getGenerativeModel({ model: "models/gemini-2.5-flash-lite-preview-06-17" });
+    const model = genAI.getGenerativeModel({ model: "models/gemini-2.5-flash-lite" });
 
     const prompt = `Translate the following ${sourceLanguage} text to ${targetLanguage}, respond only with the translated text:\n\n${text}`;
 
