@@ -96,19 +96,23 @@ export function ChatSessionProvider({ children }: { children: ReactNode }) {
             learningLanguage:
               session.learningLanguage || DEFAULT_LEARNING_LANGUAGE,
           }));
-          setSessions(validatedSessions);
 
-          // Try to load the last active session or create a new one
-          const lastSessionId = localStorage.getItem("lastActiveSessionId");
-          if (lastSessionId) {
-            const lastSession = validatedSessions.find(
-              (s) => s.id === lastSessionId
+          // If we have stored sessions, do not overwrite them.
+          // Select current session from lastActiveSessionId when possible,
+          // otherwise fall back to the most recent stored session.
+          if (validatedSessions.length > 0) {
+            setSessions(validatedSessions);
+
+            const lastSessionId = localStorage.getItem("lastActiveSessionId");
+            const lastSession = lastSessionId
+              ? validatedSessions.find((s) => s.id === lastSessionId)
+              : undefined;
+
+            const fallbackSession = validatedSessions.reduce((latest, s) =>
+              s.createdAt > latest.createdAt ? s : latest
             );
-            if (lastSession) {
-              setCurrentSession(lastSession);
-            } else {
-              initializeDefaultSession();
-            }
+
+            setCurrentSession(lastSession || fallbackSession);
           } else {
             initializeDefaultSession();
           }
