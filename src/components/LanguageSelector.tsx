@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import { useLanguage } from '@/context/LanguageContext';
 import { useChatSession } from '@/context/ChatSessionContext';
 import { useClientTranslations } from '@/hooks/useClientTranslations';
 
@@ -26,19 +25,19 @@ const languageEmojis: { [key: string]: string } = {
 };
 
 export default function LanguageSelector() {
-  const { nativeLanguage, setNativeLanguage, learningLanguage, setLearningLanguage } = useLanguage();
   const { currentSession, updateSessionLanguages } = useChatSession();
   const { t } = useClientTranslations();
 
+  const nativeLanguage = currentSession?.nativeLanguage || 'English';
+  const learningLanguage = currentSession?.learningLanguage || 'Japanese';
+
   const handleNativeLanguageChange = (lang: string) => {
-    setNativeLanguage(lang);
     if (currentSession) {
       updateSessionLanguages(currentSession.id, lang, learningLanguage);
     }
   };
 
   const handleLearningLanguageChange = (lang: string) => {
-    setLearningLanguage(lang);
     if (currentSession) {
       updateSessionLanguages(currentSession.id, nativeLanguage, lang);
     }

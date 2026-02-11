@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { LanguageProvider } from "@/context/LanguageContext";
 import { ChatSessionProvider } from "@/context/ChatSessionContext";
 import { UILanguageProvider } from "@/context/UILanguageContext";
 import { MobileProvider } from "@/context/MobileContext";
@@ -37,8 +36,7 @@ export default function RootLayout({
         <UILanguageProvider>
           <ThemeProvider>
             <MobileProvider>
-              <LanguageProvider>
-                <ChatSessionProvider>
+              <ChatSessionProvider>
                 <div className="flex h-screen">
                   <SessionSidebar />
                   <div className="flex-1 flex flex-col min-w-0">
@@ -48,8 +46,7 @@ export default function RootLayout({
                     </main>
                   </div>
                 </div>
-                </ChatSessionProvider>
-              </LanguageProvider>
+              </ChatSessionProvider>
             </MobileProvider>
           </ThemeProvider>
         </UILanguageProvider>

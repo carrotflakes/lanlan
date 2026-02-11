@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useMemo } from "react";
-import { useLanguage } from "@/context/LanguageContext";
 import { useChatSession, type Message } from "@/context/ChatSessionContext";
 import { useClientTranslations } from "@/hooks/useClientTranslations";
 import { FaLanguage, FaVolumeUp, FaLightbulb } from "react-icons/fa";
@@ -20,13 +19,14 @@ const LANGUAGE_MAP: { [key: string]: string } = {
 
 export default function ChatInterface() {
   const [input, setInput] = useState("");
-  const { nativeLanguage, learningLanguage } = useLanguage();
   const { currentSession, updateCurrentSessionMessages } = useChatSession();
   const { t } = useClientTranslations();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [loading, setLoading] = useState(false);
 
   const messages = currentSession ? currentSession.messages : [];
+  const nativeLanguage = currentSession?.nativeLanguage || 'English';
+  const learningLanguage = currentSession?.learningLanguage || 'Japanese';
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });

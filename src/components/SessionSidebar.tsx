@@ -1,7 +1,6 @@
 "use client";
 
 import { useChatSession } from "@/context/ChatSessionContext";
-import { useLanguage } from "@/context/LanguageContext";
 import { useClientTranslations } from "@/hooks/useClientTranslations";
 import { useMobile } from "@/context/MobileContext";
 import { useRouter } from "next/navigation";
@@ -16,26 +15,19 @@ export default function SessionSidebar() {
     loadSession,
     deleteSession,
   } = useChatSession();
-  const { nativeLanguage, learningLanguage, updateLanguagesFromSession } =
-    useLanguage();
   const { t } = useClientTranslations();
   const { isSidebarOpen, closeSidebar } = useMobile();
   const router = useRouter();
 
   const handleLoadSession = (sessionId: string) => {
-    const session = sessions.find((s) => s.id === sessionId);
-    if (session) {
-      loadSession(sessionId);
-      updateLanguagesFromSession(
-        session.nativeLanguage,
-        session.learningLanguage
-      );
-      closeSidebar(); // Close sidebar on mobile after selection
-      router.push("/chat");
-    }
+    loadSession(sessionId);
+    closeSidebar(); // Close sidebar on mobile after selection
+    router.push("/chat");
   };
 
   const handleCreateSession = () => {
+    const nativeLanguage = currentSession?.nativeLanguage || 'English';
+    const learningLanguage = currentSession?.learningLanguage || 'Japanese';
     createSession(nativeLanguage, learningLanguage);
     closeSidebar(); // Close sidebar on mobile after creation
     router.push("/chat");

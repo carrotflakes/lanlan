@@ -1,11 +1,12 @@
 'use client';
 
-import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
+import React, { createContext, useState, useContext, ReactNode, useEffect, useCallback } from 'react';
 
 interface UILanguageContextType {
   uiLanguage: string;
   setUILanguage: (lang: string) => void;
   availableUILanguages: { code: string; name: string; nativeName: string }[];
+  isInitialized: boolean;
 }
 
 const availableUILanguages = [
@@ -19,10 +20,15 @@ const UILanguageContext = createContext<UILanguageContextType | undefined>(undef
 
 export function UILanguageProvider({ children }: { children: ReactNode }) {
   const [uiLanguage, setUILanguageState] = useState('en');
+  const [isInitialized, setIsInitialized] = useState(false);
 
+  // Initialize UI language on mount
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (typeof window === 'undefined') return;
+
+    try {
       const storedUILanguage = localStorage.getItem('uiLanguage');
+
       if (storedUILanguage && availableUILanguages.some(lang => lang.code === storedUILanguage)) {
         setUILanguageState(storedUILanguage);
       } else {
@@ -32,18 +38,32 @@ export function UILanguageProvider({ children }: { children: ReactNode }) {
           setUILanguageState(browserLang);
         }
       }
+
+      setIsInitialized(true);
+    } catch (error) {
+      console.error('Failed to load UI language from localStorage:', error);
+      setIsInitialized(true);
     }
   }, []);
 
+  // Save UI language to localStorage when it changes
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('uiLanguage', uiLanguage);
-    }
-  }, [uiLanguage]);
+    if (!isInitialized || typeof window === 'undefined') return;
 
-  const setUILanguage = (lang: string) => {
-    setUILanguageState(lang);
-  };
+    try {
+      localStorage.setItem('uiLanguage', uiLanguage);
+    } catch (error) {
+      console.error('Failed to save UI language to localStorage:', error);
+    }
+  }, [uiLanguage, isInitialized]);
+
+  const setUILanguage = useCallback((lang: string) => {
+    if (availableUILanguages.some(l => l.code === lang)) {
+      setUILanguageState(lang);
+    } else {
+      console.warn(`Invalid UI language code: ${lang}`);
+    }
+  }, []);
 
   return (
     <UILanguageContext.Provider
@@ -51,6 +71,7 @@ export function UILanguageProvider({ children }: { children: ReactNode }) {
         uiLanguage,
         setUILanguage,
         availableUILanguages,
+        isInitialized,
       }}
     >
       {children}

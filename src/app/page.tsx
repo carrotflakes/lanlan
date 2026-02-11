@@ -2,17 +2,17 @@
 
 import LanguageSelector from "@/components/LanguageSelector";
 import { useChatSession } from "@/context/ChatSessionContext";
-import { useLanguage } from "@/context/LanguageContext";
 import { useClientTranslations } from "@/hooks/useClientTranslations";
 import { useRouter } from "next/navigation";
 
 export default function Home() {
-  const { createSession } = useChatSession();
-  const { nativeLanguage, learningLanguage } = useLanguage();
+  const { createSession, currentSession } = useChatSession();
   const { t } = useClientTranslations();
   const router = useRouter();
 
   const handleStartLearning = () => {
+    const nativeLanguage = currentSession?.nativeLanguage || 'English';
+    const learningLanguage = currentSession?.learningLanguage || 'Japanese';
     createSession(nativeLanguage, learningLanguage);
     router.push('/chat');
   };

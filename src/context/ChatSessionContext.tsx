@@ -2,10 +2,11 @@
 
 import React, {
   createContext,
-  useState,
+  useReducer,
   useContext,
   ReactNode,
   useEffect,
+  useCallback,
 } from "react";
 import { v4 as uuidv4 } from "uuid";
 
@@ -23,7 +24,7 @@ export interface Message {
   showAnnotations?: boolean;
 }
 
-interface ChatSession {
+export interface ChatSession {
   id: string;
   name: string;
   messages: Message[];
@@ -36,9 +37,24 @@ interface ChatSession {
 const DEFAULT_NATIVE_LANGUAGE = "English";
 const DEFAULT_LEARNING_LANGUAGE = "Japanese";
 
-interface ChatSessionContextType {
+// State type
+interface ChatSessionState {
   sessions: ChatSession[];
   currentSession: ChatSession | null;
+  isInitialized: boolean;
+}
+
+// Action types
+type ChatSessionAction =
+  | { type: "INITIALIZE"; payload: { sessions: ChatSession[]; currentSessionId?: string } }
+  | { type: "CREATE_SESSION"; payload: ChatSession }
+  | { type: "LOAD_SESSION"; payload: string }
+  | { type: "UPDATE_MESSAGES"; payload: { sessionId: string; messages: Message[] } }
+  | { type: "UPDATE_LANGUAGES"; payload: { sessionId: string; nativeLanguage: string; learningLanguage: string } }
+  | { type: "DELETE_SESSION"; payload: string };
+
+// Context type
+interface ChatSessionContextType extends ChatSessionState {
   createSession: (nativeLanguage?: string, learningLanguage?: string) => void;
   loadSession: (sessionId: string) => void;
   updateCurrentSessionMessages: (newMessages: Message[]) => void;
@@ -50,180 +66,260 @@ interface ChatSessionContextType {
   ) => void;
 }
 
+// Helper function to create a default session
+const createDefaultSession = (sessionNumber: number): ChatSession => ({
+  id: uuidv4(),
+  name: `Session ${sessionNumber}`,
+  messages: [],
+  createdAt: Date.now(),
+  nativeLanguage: DEFAULT_NATIVE_LANGUAGE,
+  learningLanguage: DEFAULT_LEARNING_LANGUAGE,
+});
+
+// Reducer function
+function chatSessionReducer(
+  state: ChatSessionState,
+  action: ChatSessionAction
+): ChatSessionState {
+  switch (action.type) {
+    case "INITIALIZE": {
+      const { sessions, currentSessionId } = action.payload;
+      if (sessions.length === 0) {
+        const defaultSession = createDefaultSession(1);
+        return {
+          sessions: [defaultSession],
+          currentSession: defaultSession,
+          isInitialized: true,
+        };
+      }
+
+      let currentSession: ChatSession;
+      if (currentSessionId) {
+        const found = sessions.find((s) => s.id === currentSessionId);
+        currentSession = found || sessions.reduce((latest, s) =>
+          s.createdAt > latest.createdAt ? s : latest
+        );
+      } else {
+        currentSession = sessions.reduce((latest, s) =>
+          s.createdAt > latest.createdAt ? s : latest
+        );
+      }
+
+      return {
+        sessions,
+        currentSession,
+        isInitialized: true,
+      };
+    }
+
+    case "CREATE_SESSION": {
+      const newSession = action.payload;
+      return {
+        ...state,
+        sessions: [...state.sessions, newSession],
+        currentSession: newSession,
+      };
+    }
+
+    case "LOAD_SESSION": {
+      const sessionId = action.payload;
+      const session = state.sessions.find((s) => s.id === sessionId);
+      if (!session) return state;
+
+      return {
+        ...state,
+        currentSession: session,
+      };
+    }
+
+    case "UPDATE_MESSAGES": {
+      const { sessionId, messages } = action.payload;
+      const updatedSessions = state.sessions.map((s) =>
+        s.id === sessionId ? { ...s, messages } : s
+      );
+
+      return {
+        ...state,
+        sessions: updatedSessions,
+        currentSession:
+          state.currentSession?.id === sessionId
+            ? { ...state.currentSession, messages }
+            : state.currentSession,
+      };
+    }
+
+    case "UPDATE_LANGUAGES": {
+      const { sessionId, nativeLanguage, learningLanguage } = action.payload;
+      const updatedSessions = state.sessions.map((s) =>
+        s.id === sessionId ? { ...s, nativeLanguage, learningLanguage } : s
+      );
+
+      return {
+        ...state,
+        sessions: updatedSessions,
+        currentSession:
+          state.currentSession?.id === sessionId
+            ? { ...state.currentSession, nativeLanguage, learningLanguage }
+            : state.currentSession,
+      };
+    }
+
+    case "DELETE_SESSION": {
+      const sessionId = action.payload;
+      const filteredSessions = state.sessions.filter((s) => s.id !== sessionId);
+
+      // If no sessions remain, create a new default session
+      if (filteredSessions.length === 0) {
+        const defaultSession = createDefaultSession(1);
+        return {
+          ...state,
+          sessions: [defaultSession],
+          currentSession: defaultSession,
+        };
+      }
+
+      // If the deleted session was the current one, switch to most recent
+      if (state.currentSession?.id === sessionId) {
+        const mostRecentSession = filteredSessions.reduce((latest, s) =>
+          s.createdAt > latest.createdAt ? s : latest
+        );
+        return {
+          ...state,
+          sessions: filteredSessions,
+          currentSession: mostRecentSession,
+        };
+      }
+
+      return {
+        ...state,
+        sessions: filteredSessions,
+      };
+    }
+
+    default:
+      return state;
+  }
+}
+
 const ChatSessionContext = createContext<ChatSessionContextType | undefined>(
   undefined
 );
 
 export function ChatSessionProvider({ children }: { children: ReactNode }) {
-  const [sessions, setSessions] = useState<ChatSession[]>([]);
-  const [currentSession, setCurrentSession] = useState<ChatSession | null>(
-    null
-  );
-
-  // Helper function to create a default session
-  const createDefaultSession = (sessionNumber?: number): ChatSession => {
-    const sessionName = sessionNumber
-      ? `Session ${sessionNumber}`
-      : "Session 1";
-    return {
-      id: uuidv4(),
-      name: sessionName,
-      messages: [],
-      createdAt: Date.now(),
-      nativeLanguage: DEFAULT_NATIVE_LANGUAGE,
-      learningLanguage: DEFAULT_LEARNING_LANGUAGE,
-    };
-  };
-
-  // Helper function to initialize default session and set it as current
-  const initializeDefaultSession = () => {
-    const defaultSession = createDefaultSession();
-    setSessions([defaultSession]);
-    setCurrentSession(defaultSession);
-  };
+  const [state, dispatch] = useReducer(chatSessionReducer, {
+    sessions: [],
+    currentSession: null,
+    isInitialized: false,
+  });
 
   // Load sessions from localStorage on initial mount
   useEffect(() => {
-    if (typeof window !== "undefined") {
+    if (typeof window === "undefined") return;
+
+    try {
       const storedSessions = localStorage.getItem("chatSessions");
+      const lastSessionId = localStorage.getItem("lastActiveSessionId");
+
       if (storedSessions) {
-        try {
-          const parsedSessions: ChatSession[] = JSON.parse(storedSessions);
-          // Ensure all sessions have required language properties
-          const validatedSessions = parsedSessions.map((session) => ({
-            ...session,
-            nativeLanguage: session.nativeLanguage || DEFAULT_NATIVE_LANGUAGE,
-            learningLanguage:
-              session.learningLanguage || DEFAULT_LEARNING_LANGUAGE,
-          }));
+        const parsedSessions: ChatSession[] = JSON.parse(storedSessions);
+        // Validate and normalize sessions
+        const validatedSessions = parsedSessions.map((session) => ({
+          ...session,
+          nativeLanguage: session.nativeLanguage || DEFAULT_NATIVE_LANGUAGE,
+          learningLanguage: session.learningLanguage || DEFAULT_LEARNING_LANGUAGE,
+        }));
 
-          // If we have stored sessions, do not overwrite them.
-          // Select current session from lastActiveSessionId when possible,
-          // otherwise fall back to the most recent stored session.
-          if (validatedSessions.length > 0) {
-            setSessions(validatedSessions);
-
-            const lastSessionId = localStorage.getItem("lastActiveSessionId");
-            const lastSession = lastSessionId
-              ? validatedSessions.find((s) => s.id === lastSessionId)
-              : undefined;
-
-            const fallbackSession = validatedSessions.reduce((latest, s) =>
-              s.createdAt > latest.createdAt ? s : latest
-            );
-
-            setCurrentSession(lastSession || fallbackSession);
-          } else {
-            initializeDefaultSession();
-          }
-        } catch (error) {
-          console.error("Failed to parse stored sessions:", error);
-          initializeDefaultSession();
-        }
+        dispatch({
+          type: "INITIALIZE",
+          payload: {
+            sessions: validatedSessions,
+            currentSessionId: lastSessionId || undefined,
+          },
+        });
       } else {
-        initializeDefaultSession();
+        dispatch({ type: "INITIALIZE", payload: { sessions: [] } });
       }
+    } catch (error) {
+      console.error("Failed to load sessions from localStorage:", error);
+      dispatch({ type: "INITIALIZE", payload: { sessions: [] } });
     }
   }, []);
 
   // Save sessions to localStorage whenever they change
   useEffect(() => {
-    if (typeof window !== "undefined" && sessions.length > 0) {
-      localStorage.setItem("chatSessions", JSON.stringify(sessions));
+    if (typeof window === "undefined" || !state.isInitialized) return;
+
+    try {
+      localStorage.setItem("chatSessions", JSON.stringify(state.sessions));
+    } catch (error) {
+      console.error("Failed to save sessions to localStorage:", error);
     }
-  }, [sessions]);
+  }, [state.sessions, state.isInitialized]);
 
   // Save current session ID to localStorage
   useEffect(() => {
-    if (typeof window !== "undefined" && currentSession) {
-      localStorage.setItem("lastActiveSessionId", currentSession.id);
+    if (typeof window === "undefined" || !state.currentSession || !state.isInitialized) return;
+
+    try {
+      localStorage.setItem("lastActiveSessionId", state.currentSession.id);
+    } catch (error) {
+      console.error("Failed to save current session ID to localStorage:", error);
     }
-  }, [currentSession]);
+  }, [state.currentSession, state.isInitialized]);
 
-  const createSession = (
-    nativeLanguage: string = DEFAULT_NATIVE_LANGUAGE,
-    learningLanguage: string = DEFAULT_LEARNING_LANGUAGE
-  ) => {
-    const sessionNumber = sessions.length + 1;
-    const newSession: ChatSession = {
-      id: uuidv4(),
-      name: `Session ${sessionNumber}`,
-      messages: [],
-      createdAt: Date.now(),
-      nativeLanguage,
-      learningLanguage,
-    };
-    setSessions((prev) => [...prev, newSession]);
-    setCurrentSession(newSession);
-  };
+  const createSession = useCallback(
+    (
+      nativeLanguage: string = DEFAULT_NATIVE_LANGUAGE,
+      learningLanguage: string = DEFAULT_LEARNING_LANGUAGE
+    ) => {
+      const sessionNumber = state.sessions.length + 1;
+      const newSession: ChatSession = {
+        id: uuidv4(),
+        name: `Session ${sessionNumber}`,
+        messages: [],
+        createdAt: Date.now(),
+        nativeLanguage,
+        learningLanguage,
+      };
+      dispatch({ type: "CREATE_SESSION", payload: newSession });
+    },
+    [state.sessions.length]
+  );
 
-  const loadSession = (sessionId: string) => {
-    const sessionToLoad = sessions.find((s) => s.id === sessionId);
-    if (sessionToLoad) {
-      setCurrentSession(sessionToLoad);
-    }
-  };
+  const loadSession = useCallback((sessionId: string) => {
+    dispatch({ type: "LOAD_SESSION", payload: sessionId });
+  }, []);
 
-  const updateCurrentSessionMessages = (newMessages: Message[]) => {
-    if (currentSession) {
-      setSessions((prevSessions) =>
-        prevSessions.map((s) =>
-          s.id === currentSession.id ? { ...s, messages: newMessages } : s
-        )
-      );
-      setCurrentSession((prev) =>
-        prev ? { ...prev, messages: newMessages } : null
-      );
-    }
-  };
-
-  const updateSessionLanguages = (
-    sessionId: string,
-    nativeLanguage: string,
-    learningLanguage: string
-  ) => {
-    setSessions((prevSessions) =>
-      prevSessions.map((s) =>
-        s.id === sessionId ? { ...s, nativeLanguage, learningLanguage } : s
-      )
-    );
-    if (currentSession && currentSession.id === sessionId) {
-      setCurrentSession((prev) =>
-        prev ? { ...prev, nativeLanguage, learningLanguage } : null
-      );
-    }
-  };
-
-  const deleteSession = (sessionId: string) => {
-    const sessionToDelete = sessions.find((s) => s.id === sessionId);
-    if (!sessionToDelete) return;
-
-    const filteredSessions = sessions.filter((s) => s.id !== sessionId);
-
-    // If the deleted session was the current one
-    if (currentSession && currentSession.id === sessionId) {
-      if (filteredSessions.length > 0) {
-        // Load the most recent remaining session
-        const mostRecentSession = filteredSessions.sort(
-          (a, b) => b.createdAt - a.createdAt
-        )[0];
-        setSessions(filteredSessions);
-        setCurrentSession(mostRecentSession);
-      } else {
-        // No sessions left, create a new one
-        initializeDefaultSession();
+  const updateCurrentSessionMessages = useCallback(
+    (newMessages: Message[]) => {
+      if (state.currentSession) {
+        dispatch({
+          type: "UPDATE_MESSAGES",
+          payload: { sessionId: state.currentSession.id, messages: newMessages },
+        });
       }
-    } else {
-      // Deleted session was not the current one, just remove it
-      setSessions(filteredSessions);
-    }
-  };
+    },
+    [state.currentSession]
+  );
+
+  const updateSessionLanguages = useCallback(
+    (sessionId: string, nativeLanguage: string, learningLanguage: string) => {
+      dispatch({
+        type: "UPDATE_LANGUAGES",
+        payload: { sessionId, nativeLanguage, learningLanguage },
+      });
+    },
+    []
+  );
+
+  const deleteSession = useCallback((sessionId: string) => {
+    dispatch({ type: "DELETE_SESSION", payload: sessionId });
+  }, []);
 
   return (
     <ChatSessionContext.Provider
       value={{
-        sessions,
-        currentSession,
+        ...state,
         createSession,
         loadSession,
         updateCurrentSessionMessages,
