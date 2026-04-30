@@ -212,16 +212,18 @@ export default function ChatInterface() {
   };
 
   return (
-    <div className="flex flex-col h-full bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-xl sm:rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 transition-colors duration-300">
-      <div className="flex-grow overflow-y-auto p-2 sm:p-4 space-y-2 sm:space-y-3">
+    <div className="flex flex-col h-full bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+      <div className="flex-grow overflow-y-auto p-4 sm:p-5 space-y-4">
         {messages.length === 0 ? (
-          <div className="flex items-center justify-center h-full text-center">
-            <div className="space-y-3 sm:space-y-4 px-4">
-              <div className="text-4xl sm:text-6xl">💬</div>
-              <h3 className="text-lg sm:text-xl font-semibold text-gray-700">
+          <div className="flex items-center justify-center h-full">
+            <div className="text-center space-y-3 px-4">
+              <div className="w-16 h-16 mx-auto rounded-2xl bg-violet-50 dark:bg-violet-950/30 flex items-center justify-center">
+                <span className="text-3xl">💬</span>
+              </div>
+              <h3 className="text-base font-semibold text-slate-700 dark:text-slate-300">
                 {t("chat.startConversation")}
               </h3>
-              <p className="text-sm sm:text-base text-gray-500">
+              <p className="text-sm text-slate-400 dark:text-slate-500">
                 {t("chat.typeMessage")}
               </p>
             </div>
@@ -241,34 +243,26 @@ export default function ChatInterface() {
           ))
         )}
         {loading && (
-          <div className="flex justify-start mb-4">
-            <div className="max-w-[75%] rounded-2xl px-4 py-3 bg-gray-100">
-              <div className="flex items-center space-x-2">
-                <div className="flex space-x-1">
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                  <div
-                    className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
-                    style={{ animationDelay: "0.1s" }}
-                  ></div>
-                  <div
-                    className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
-                    style={{ animationDelay: "0.2s" }}
-                  ></div>
+          <div className="flex justify-start">
+            <div className="rounded-2xl rounded-tl-sm px-4 py-3 bg-slate-100 dark:bg-slate-800">
+              <div className="flex items-center gap-2">
+                <div className="flex gap-1">
+                  <div className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce"></div>
+                  <div className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: "0.15s" }}></div>
+                  <div className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: "0.3s" }}></div>
                 </div>
-                <span className="text-sm text-gray-600">
-                  {t("chat.aiThinking")}
-                </span>
+                <span className="text-xs text-slate-500">{t("chat.aiThinking")}</span>
               </div>
             </div>
           </div>
         )}
         <div ref={messagesEndRef} />
       </div>
-      <div className="p-3 sm:p-4 border-t border-gray-200">
-        <div className="flex space-x-2 sm:space-x-3">
+      <div className="p-3 sm:p-4 border-t border-slate-100 dark:border-slate-800">
+        <div className="flex gap-2">
           <input
             type="text"
-            className="flex-grow px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border-2 border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white"
+            className="flex-grow px-4 py-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
             placeholder={t("chat.inputPlaceholder")}
             value={input}
             onChange={(e) => setInput(e.target.value)}
@@ -280,10 +274,10 @@ export default function ChatInterface() {
             disabled={loading}
           />
           <button
-            className={`px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base rounded-lg sm:rounded-xl font-medium transition-all duration-200 ${
+            className={`px-5 py-2.5 text-sm rounded-xl font-medium ${
               loading || !input.trim()
-                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                : "bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white shadow-md hover:shadow-lg transform hover:scale-105"
+                ? "bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed"
+                : "bg-violet-600 hover:bg-violet-700 text-white shadow-sm shadow-violet-500/20 hover:shadow-md hover:shadow-violet-500/30"
             }`}
             onClick={sendMessage}
             disabled={loading || !input.trim()}
@@ -298,10 +292,10 @@ export default function ChatInterface() {
 
 // Common CSS classes
 const BUTTON_BASE_CLASSES =
-  "flex items-center space-x-1 text-xs px-2 sm:px-3 py-1 rounded-full transition-colors duration-200";
-const TRANSLATE_BUTTON_CLASSES = `${BUTTON_BASE_CLASSES} bg-blue-50 hover:bg-blue-100 text-blue-600`;
-const SPEAK_BUTTON_CLASSES = `${BUTTON_BASE_CLASSES} bg-green-50 hover:bg-green-100 text-green-600`;
-const ANNOTATE_BUTTON_CLASSES = `${BUTTON_BASE_CLASSES} bg-yellow-50 hover:bg-yellow-100 text-yellow-600`;
+  "flex items-center gap-1 text-xs px-2.5 py-1 rounded-full";
+const TRANSLATE_BUTTON_CLASSES = `${BUTTON_BASE_CLASSES} bg-violet-50 hover:bg-violet-100 text-violet-600 dark:bg-violet-950/30 dark:hover:bg-violet-950/50 dark:text-violet-400`;
+const SPEAK_BUTTON_CLASSES = `${BUTTON_BASE_CLASSES} bg-emerald-50 hover:bg-emerald-100 text-emerald-600 dark:bg-emerald-950/30 dark:hover:bg-emerald-950/50 dark:text-emerald-400`;
+const ANNOTATE_BUTTON_CLASSES = `${BUTTON_BASE_CLASSES} bg-amber-50 hover:bg-amber-100 text-amber-600 dark:bg-amber-950/30 dark:hover:bg-amber-950/50 dark:text-amber-400`;
 
 // Message Action Button Component
 const MessageActionButton = ({
@@ -344,23 +338,16 @@ const MessageBubble = ({
   <div
     className={`flex ${
       msg.role === "user" ? "justify-end" : "justify-start"
-    } mb-3 sm:mb-4`}
+    }`}
   >
     <div
-      className={`max-w-[85%] sm:max-w-[75%] rounded-xl sm:rounded-2xl px-3 sm:px-4 py-2 sm:py-3 ${
+      className={`max-w-[85%] sm:max-w-[78%] px-4 py-3 ${
         msg.role === "user"
-          ? "bg-gradient-to-r from-blue-500 to-indigo-600 text-white"
-          : "bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200"
+          ? "bg-violet-600 text-white rounded-2xl rounded-br-sm"
+          : "bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 rounded-2xl rounded-tl-sm"
       }`}
     >
-      <div className="flex items-center mb-1 sm:mb-2">
-        <span className="text-xs sm:text-sm font-medium opacity-80">
-          {msg.role === "user"
-            ? `👤 ${t("chat.you")}`
-            : `🤖 ${t("chat.aiAssistant")}`}
-        </span>
-      </div>
-      <div className="text-sm sm:text-base leading-relaxed">
+      <div className="text-sm leading-relaxed">
         {msg.role === "model" ? (
           <AIText text={msg.parts} annotations={msg.annotations} />
         ) : (
@@ -368,8 +355,8 @@ const MessageBubble = ({
         )}
       </div>
       {msg.role === "model" && (
-        <div className="flex items-center justify-start mt-2 sm:mt-3 pt-2 border-t border-gray-200">
-          <div className="flex items-center space-x-2 sm:space-x-3">
+        <div className="flex items-center justify-start mt-2.5 pt-2.5 border-t border-slate-200 dark:border-slate-700">
+          <div className="flex items-center gap-2">
             <MessageActionButton
               onClick={() => onTranslate(index, msg.parts)}
               icon={<FaLanguage size={12} />}
@@ -411,30 +398,30 @@ const MessageBubble = ({
         </div>
       )}
       {msg.showTranslation && msg.translatedText && (
-        <div className="mt-3 p-3 bg-white/80 rounded-lg border border-gray-200">
-          <p className="text-xs font-medium text-gray-600 mb-1">
-            🌍 {t("chat.translation")}:
+        <div className="mt-3 p-3 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700">
+          <p className="text-xs font-semibold text-violet-500 dark:text-violet-400 mb-1.5 uppercase tracking-wide">
+            {t("chat.translation")}
           </p>
-          <p className="text-sm text-gray-700">{msg.translatedText}</p>
+          <p className="text-sm text-slate-700 dark:text-slate-300">{msg.translatedText}</p>
         </div>
       )}
       {msg.showAnnotations && msg.annotations && (
-        <div className="mt-3 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
-          <p className="text-xs font-medium text-yellow-700 mb-2">
-            💡 {t("chat.annotations")}:
+        <div className="mt-3 p-3 bg-amber-50 dark:bg-amber-950/20 rounded-lg border border-amber-200 dark:border-amber-800/40">
+          <p className="text-xs font-semibold text-amber-600 dark:text-amber-400 mb-2 uppercase tracking-wide">
+            {t("chat.annotations")}
           </p>
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             {msg.annotations.map(
               (
                 annotation: { word: string; explanation: string },
                 idx: number
               ) => (
                 <div key={idx} className="text-sm">
-                  <span className="font-semibold text-yellow-800">
+                  <span className="font-semibold text-amber-700 dark:text-amber-300">
                     {annotation.word}
                   </span>
-                  <span className="text-yellow-700 ml-2">
-                    - {annotation.explanation}
+                  <span className="text-slate-600 dark:text-slate-400 ml-2">
+                    — {annotation.explanation}
                   </span>
                 </div>
               )
@@ -488,7 +475,7 @@ function AIText({
   };
 
   return (
-    <div className="text-gray-800 dark:text-gray-200">
+    <div className="text-slate-800 dark:text-slate-200">
       {parts.map((part, index) =>
         typeof part === "string" ? (
           <span key={index} className="whitespace-pre-wrap">
@@ -497,15 +484,15 @@ function AIText({
         ) : (
           <span
             key={index}
-            className="underline decoration-yellow-500 decoration-2 decoration-dotted cursor-help relative group"
+            className="underline decoration-amber-400 decoration-2 decoration-dotted cursor-help relative"
             onClick={() => handleTooltipToggle(index)}
           >
             {part.word}
-            <div className={`absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg shadow-lg transition-opacity duration-200 z-10 ${
+            <div className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-slate-900 dark:bg-slate-700 text-white text-xs rounded-lg shadow-xl z-10 w-max max-w-xs ${
               activeTooltip === index ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
             }`}>
-              <div className="max-w-xl break-keep">{part.explanation}</div>
-              <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
+              <div className="break-words">{part.explanation}</div>
+              <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-slate-900 dark:border-t-slate-700"></div>
             </div>
           </span>
         )

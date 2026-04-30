@@ -31,7 +31,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-gray-100 transition-colors duration-300`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100`}
       >
         <UILanguageProvider>
           <ThemeProvider>
@@ -41,7 +41,7 @@ export default function RootLayout({
                   <SessionSidebar />
                   <div className="flex-1 flex flex-col min-w-0">
                     <Header />
-                    <main className="flex-1 overflow-y-auto p-2 sm:p-3">
+                    <main className="flex-1 overflow-y-auto p-3 sm:p-4">
                       {children}
                     </main>
                   </div>

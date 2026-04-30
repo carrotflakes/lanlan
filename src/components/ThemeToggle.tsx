@@ -12,10 +12,10 @@ export default function ThemeToggle() {
   return (
     <button
       onClick={toggleDarkMode}
-      className="p-2 rounded-lg transition-colors duration-200 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300"
+      className="p-2 rounded-lg text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
       title={isDarkMode ? t('theme.switchToLight') : t('theme.switchToDark')}
     >
-      {isDarkMode ? <FaSun size={16} /> : <FaMoon size={16} />}
+      {isDarkMode ? <FaSun size={15} /> : <FaMoon size={15} />}
     </button>
   );
 };

@@ -46,15 +46,15 @@ export default function SessionSidebar() {
     <>
       {/* Mobile backdrop */}
       {isSidebarOpen && (
-        <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={closeSidebar} />
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden" onClick={closeSidebar} />
       )}
       
       <aside 
         className={`
           fixed lg:relative z-50 lg:z-auto
           w-64 sm:w-72 lg:w-64
-          bg-white/95 lg:bg-white/90 dark:bg-gray-900/95 dark:lg:bg-gray-900/90 backdrop-blur-sm 
-          border-r border-gray-200 dark:border-gray-700 shadow-lg lg:shadow-lg
+          bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800
+          shadow-xl lg:shadow-none
           flex flex-col h-screen
           transform transition-transform duration-300 ease-in-out
           ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
@@ -62,70 +62,67 @@ export default function SessionSidebar() {
         onClick={(e) => e.stopPropagation()}
       >
         {/* Mobile close button */}
-        <div className="lg:hidden flex justify-end p-2">
+        <div className="lg:hidden flex justify-end p-3">
           <button
             onClick={closeSidebar}
-            className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+            className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg"
           >
-            <FaTimes size={16} />
+            <FaTimes size={14} />
           </button>
         </div>
         
-        <div className="p-3 lg:p-4 border-b border-gray-100 dark:border-gray-700 space-y-3">
-        <h2 className="text-base font-semibold text-gray-800 dark:text-gray-100 mb-1 flex items-center">
-          💬 {t('sidebar.sessions')}
-        </h2>
-        <button
-          onClick={handleCreateSession}
-          className="w-full flex items-center justify-center bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 dark:from-blue-600 dark:to-indigo-700 dark:hover:from-blue-700 dark:hover:to-indigo-800 text-white font-medium py-2 px-3 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md text-sm"
-        >
-          <FaPlus className="mr-1.5" size={12} /> {t('sidebar.newSession')}
-        </button>
-      </div>
-        <div className="flex-grow overflow-y-auto p-2 lg:p-3 space-y-2">
-        {sessions.length === 0 ? (
-          <div className="text-center text-gray-500 dark:text-gray-400 py-6">
-            <p className="text-xs">{t('sidebar.noSessions')}</p>
-            <p className="text-xs mt-1 opacity-75">{t('sidebar.createToStart')}</p>
-          </div>
-        ) : (
-          sessions.map((session) => (
-            <div
-              key={session.id}
-              className={`group flex items-center justify-between p-3 rounded-lg cursor-pointer transition-all duration-200 ${
-                currentSession?.id === session.id
-                  ? "bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-2 border-blue-200 dark:border-blue-600 shadow-md"
-                  : "bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-700/50 border border-gray-200 dark:border-gray-600"
-              }`}
-              onClick={() => handleLoadSession(session.id)}
-            >
-              <div className="flex-1 min-w-0">
-                <h3 className="text-sm font-medium text-gray-800 dark:text-gray-100 truncate">
-                  {session.name}
-                </h3>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                  {t('sidebar.messagesCount', { count: session.messages.length })} • {session.nativeLanguage.slice(0,2)}→{session.learningLanguage.slice(0,2)}
-                </p>
-              </div>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (
-                    confirm(
-                      t('sidebar.deleteConfirm')
-                    )
-                  ) {
-                    deleteSession(session.id);
-                  }
-                }}
-                className="opacity-0 group-hover:opacity-100 text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 p-1.5 rounded-md transition-all duration-200 hover:bg-red-50 dark:hover:bg-red-900/30"
-                title="Delete session"
-              >
-                <FaTrash size={12} />
-              </button>
+        <div className="px-4 pt-4 pb-3 border-b border-slate-100 dark:border-slate-800 space-y-3">
+          <h2 className="text-xs font-semibold tracking-widest uppercase text-slate-400 dark:text-slate-500">
+            {t('sidebar.sessions')}
+          </h2>
+          <button
+            onClick={handleCreateSession}
+            className="w-full flex items-center justify-center gap-2 bg-violet-600 hover:bg-violet-700 text-white font-medium py-2 px-3 rounded-lg text-sm shadow-sm shadow-violet-500/20 hover:shadow-md hover:shadow-violet-500/30"
+          >
+            <FaPlus size={11} /> {t('sidebar.newSession')}
+          </button>
+        </div>
+
+        <div className="flex-grow overflow-y-auto p-3 space-y-1">
+          {sessions.length === 0 ? (
+            <div className="text-center text-slate-400 dark:text-slate-500 py-10">
+              <p className="text-xs">{t('sidebar.noSessions')}</p>
+              <p className="text-xs mt-1 opacity-60">{t('sidebar.createToStart')}</p>
             </div>
-          ))
-        )}
+          ) : (
+            sessions.map((session) => (
+              <div
+                key={session.id}
+                className={`group flex items-center justify-between px-3 py-2.5 rounded-lg cursor-pointer ${
+                  currentSession?.id === session.id
+                    ? "bg-violet-50 dark:bg-violet-950/40 text-violet-700 dark:text-violet-300 border border-violet-200 dark:border-violet-800/60"
+                    : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60"
+                }`}
+                onClick={() => handleLoadSession(session.id)}
+              >
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-sm font-medium truncate">
+                    {session.name}
+                  </h3>
+                  <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
+                    {t('sidebar.messagesCount', { count: session.messages.length })} · {session.nativeLanguage.slice(0,2)}→{session.learningLanguage.slice(0,2)}
+                  </p>
+                </div>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (confirm(t('sidebar.deleteConfirm'))) {
+                      deleteSession(session.id);
+                    }
+                  }}
+                  className="opacity-0 group-hover:opacity-100 text-slate-300 dark:text-slate-600 hover:text-red-500 dark:hover:text-red-400 p-1.5 rounded-md hover:bg-red-50 dark:hover:bg-red-950/30"
+                  title="Delete session"
+                >
+                  <FaTrash size={11} />
+                </button>
+              </div>
+            ))
+          )}
         </div>
       </aside>
     </>

@@ -17,32 +17,34 @@ export default function Home() {
     router.push('/chat');
   };
   return (
-    <div className="flex flex-col items-center justify-center min-h-full px-4 py-6 overflow-y-auto">
-      <div className="max-w-2xl mx-auto text-center w-full">
-        <div className="mb-6 sm:mb-8">
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-800 dark:text-gray-100 mb-3 sm:mb-4">
-            {t('home.welcome', { appName: t('app.title') })} 🎆
-          </h2>
-          <p className="text-base sm:text-lg text-gray-600 dark:text-gray-300 mb-6 sm:mb-8 leading-relaxed px-2">
+    <div className="flex flex-col items-center justify-center min-h-full px-4 py-8">
+      <div className="w-full max-w-lg mx-auto">
+        <div className="text-center mb-8">
+          <div className="w-16 h-16 mx-auto mb-5 rounded-2xl bg-violet-600 flex items-center justify-center shadow-lg shadow-violet-500/25">
+            <span className="text-white text-3xl font-bold leading-none">L</span>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100 mb-3 tracking-tight">
+            {t('home.welcome', { appName: t('app.title') })}
+          </h1>
+          <p className="text-slate-500 dark:text-slate-400 leading-relaxed text-sm sm:text-base px-2">
             {t('home.description')}
           </p>
         </div>
         
-        <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 shadow-xl border border-gray-200 dark:border-gray-700 mb-6 sm:mb-8 transition-colors duration-300">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-200 dark:border-slate-800 mb-5">
           <LanguageSelector />
         </div>
         
         <button 
           onClick={handleStartLearning}
-          className="w-full sm:w-auto inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 dark:from-blue-600 dark:to-indigo-700 dark:hover:from-blue-700 dark:hover:to-indigo-800 text-white font-semibold rounded-xl sm:rounded-2xl shadow-lg transition-all duration-300 transform hover:scale-105 hover:shadow-xl"
+          className="w-full py-3 bg-violet-600 hover:bg-violet-700 text-white font-semibold rounded-xl shadow-md shadow-violet-500/20 hover:shadow-lg hover:shadow-violet-500/30 text-sm sm:text-base"
         >
-          <span className="mr-2">🚀</span>
           {t('home.startLearning')}
         </button>
         
-        <div className="mt-6 sm:mt-8 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-          <p>{t('home.poweredBy')}</p>
-        </div>
+        <p className="mt-5 text-center text-xs text-slate-400 dark:text-slate-600">
+          {t('home.poweredBy')}
+        </p>
       </div>
     </div>
   );
