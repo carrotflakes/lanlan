@@ -1,0 +1,33 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function owns(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    match /users/{uid}/profile/settings {
+      allow read, create, update, delete: if owns(uid);
+    }
+
+    match /users/{uid}/sessions/{sessionId} {
+      allow read, create, update, delete: if owns(uid);
+
+      match /messages/{messageId} {
+        allow read, create, update, delete: if owns(uid);
+      }
+    }
+
+    match /users/{uid}/apiSecrets/{secretId} {
+      allow read, write: if false;
+    }
+
+    match /users/{uid}/permissions/{permissionId} {
+      allow read, write: if false;
+    }
+  }
+}
