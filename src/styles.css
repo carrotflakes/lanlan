@@ -412,6 +412,7 @@ button:disabled {
   text-decoration: underline;
   text-decoration-color: var(--accent);
   text-decoration-thickness: 2px;
+  text-decoration-style: dotted;
   text-underline-offset: 3px;
 }
 

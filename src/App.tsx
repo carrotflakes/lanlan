@@ -548,6 +548,8 @@ function MessageItem({
     x: number;
     y: number;
   } | null>(null);
+  const activeAnnotationTriggerRef = useRef<HTMLElement | null>(null);
+  const activePopoverRef = useRef<HTMLDivElement | null>(null);
   const translationBusy = supportBusy === `${message.id}:translate`;
   const notesBusy = supportBusy === `${message.id}:annotate`;
   const annotations = message.annotations ?? [];
@@ -564,6 +566,35 @@ function MessageItem({
     }
   }, [activePopover, annotations]);
 
+  useEffect(() => {
+    if (!activePopover) {
+      return;
+    }
+
+    const handlePointerDown = (event: PointerEvent) => {
+      const target = event.target;
+      if (!(target instanceof Node)) {
+        return;
+      }
+
+      if (
+        activeAnnotationTriggerRef.current?.contains(target) ||
+        activePopoverRef.current?.contains(target)
+      ) {
+        return;
+      }
+
+      setActivePopover(null);
+      activeAnnotationTriggerRef.current = null;
+    };
+
+    document.addEventListener("pointerdown", handlePointerDown);
+
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+    };
+  }, [activePopover]);
+
   return (
     <article className={`message ${message.role}`}>
       <div className="message-body">
@@ -575,9 +606,11 @@ function MessageItem({
             onAnnotationSelect={(annotation, element) => {
               setActivePopover((current) => {
                 if (current?.annotation.phrase === annotation.phrase) {
+                  activeAnnotationTriggerRef.current = null;
                   return null;
                 }
 
+                activeAnnotationTriggerRef.current = element;
                 const rect = element.getBoundingClientRect();
                 const width = Math.min(280, window.innerWidth - 24);
                 const x = Math.min(Math.max(rect.left + rect.width / 2, width / 2 + 12), window.innerWidth - width / 2 - 12);
@@ -629,6 +662,7 @@ function MessageItem({
       {activePopover ? (
         <AnnotationPopover
           annotation={activePopover.annotation}
+          popoverRef={activePopoverRef}
           x={activePopover.x}
           y={activePopover.y}
         />
@@ -686,15 +720,18 @@ function AnnotatedText({
 
 function AnnotationPopover({
   annotation,
+  popoverRef,
   x,
   y
 }: {
   annotation: Annotation;
+  popoverRef: React.RefObject<HTMLDivElement | null>;
   x: number;
   y: number;
 }) {
   return (
     <div
+      ref={popoverRef}
       className="phrase-tooltip"
       role="tooltip"
       style={{
