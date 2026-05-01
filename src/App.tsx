@@ -73,6 +73,7 @@ export function App() {
     openaiAvailable: false,
     openaiAllowed: false
   });
+  const draftSessionRef = useRef(false);
   const seenAssistantMessageIdsRef = useRef<Set<string>>(new Set());
   const messagesInitializedRef = useRef(false);
 
@@ -112,7 +113,9 @@ export function App() {
       user.uid,
       (nextSessions) => {
         setSessions(nextSessions);
-        setSelectedSessionId((current) => current ?? nextSessions[0]?.id ?? null);
+        setSelectedSessionId((current) =>
+          draftSessionRef.current ? null : current ?? nextSessions[0]?.id ?? null
+        );
       },
       (firestoreError) => setError(firestoreError.message)
     );
@@ -190,14 +193,14 @@ export function App() {
     }
   }
 
-  async function startSession() {
-    if (!user) {
-      return;
-    }
-
+  function startSession() {
+    draftSessionRef.current = true;
     setError(null);
-    const sessionId = await createSession(user.uid, profile);
-    setSelectedSessionId(sessionId);
+    setSelectedSessionId(null);
+    setMessages([]);
+    setVisibleTranslations(new Set());
+    setVisibleNotes(new Set());
+    setPreloadingAnnotationIds(new Set());
     setDrawerOpen(false);
   }
 
@@ -240,6 +243,7 @@ export function App() {
 
       if (!sessionId) {
         sessionId = await createSession(user.uid, profile);
+        draftSessionRef.current = false;
         setSelectedSessionId(sessionId);
       }
 
@@ -361,8 +365,12 @@ export function App() {
   }
 
   const languagePair = useMemo(
-    () => `${languageNames[profile.nativeLanguage]} → ${languageNames[profile.targetLanguage]}`,
-    [profile.nativeLanguage, profile.targetLanguage]
+    () => {
+      const nativeLanguage = activeSession?.nativeLanguage ?? profile.nativeLanguage;
+      const targetLanguage = activeSession?.targetLanguage ?? profile.targetLanguage;
+      return `${languageNames[nativeLanguage]} → ${languageNames[targetLanguage]}`;
+    },
+    [activeSession?.nativeLanguage, activeSession?.targetLanguage, profile.nativeLanguage, profile.targetLanguage]
   );
 
   if (authLoading) {
@@ -397,6 +405,7 @@ export function App() {
                 key={session.id}
                 type="button"
                 onClick={() => {
+                  draftSessionRef.current = false;
                   setSelectedSessionId(session.id);
                   setDrawerOpen(false);
                 }}
@@ -533,7 +542,7 @@ function WelcomePanel({
   t: UiText;
   profile: Profile;
   onChange: (profile: Profile) => Promise<void>;
-  onStart: () => Promise<void>;
+  onStart: () => void;
 }) {
   return (
     <div className="welcome">
