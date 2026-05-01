@@ -2,7 +2,7 @@ import { initializeApp } from "firebase-admin/app";
 import { FieldValue, getFirestore } from "firebase-admin/firestore";
 import { defineSecret } from "firebase-functions/params";
 import { HttpsError, onCall } from "firebase-functions/v2/https";
-import { completeText } from "./ai.js";
+import { completeText, type StructuredOutput } from "./ai.js";
 import { buildConversationInput, parseAnnotations, providerLabel, supportPrompt } from "./prompts.js";
 import type { AiProvider, ChatMessage, Profile } from "./types.js";
 
@@ -17,6 +17,41 @@ const callableBaseOptions = {
   cors: true,
   invoker: "public" as const,
   enforceAppCheck: false
+};
+const annotationStructuredOutput: StructuredOutput = {
+  name: "language_annotations",
+  description: "Important words, phrases, and idiomatic expressions with short learner-facing explanations.",
+  strict: true,
+  schema: {
+    type: "object",
+    additionalProperties: false,
+    properties: {
+      annotations: {
+        type: "array",
+        description: "Important words, phrases, and idiomatic expressions with explanations.",
+        items: {
+          type: "object",
+          additionalProperties: false,
+          properties: {
+            phrase: {
+              type: "string",
+              description: "The exact word or phrase as it appears in the original message."
+            },
+            meaning: {
+              type: "string",
+              description: "A concise meaning or translation in the learner's native language."
+            },
+            note: {
+              type: "string",
+              description: "A brief usage note, grammar note, or context hint in the learner's native language."
+            }
+          },
+          required: ["phrase", "meaning", "note"]
+        }
+      }
+    },
+    required: ["annotations"]
+  }
 };
 
 export const sendMessage = onCall(
@@ -108,7 +143,8 @@ export const generateSupport = onCall(
           content: supportPrompt(mode, profile, message.content)
         }
       ],
-      apiKey
+      apiKey,
+      ...(mode === "annotate" ? { structuredOutput: annotationStructuredOutput } : {})
     });
 
     if (mode === "translate") {

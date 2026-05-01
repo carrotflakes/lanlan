@@ -39,7 +39,7 @@ export function supportPrompt(
   return [
     `Explain important words or phrases in this ${profile.targetLanguage} message for a ${profile.nativeLanguage} speaker.`,
     "Return compact JSON only, with this shape:",
-    '[{"phrase":"...","meaning":"...","note":"..."}]',
+    '{"annotations":[{"phrase":"...","meaning":"...","note":"..."}]}',
     "Choose at most 4 useful items.",
     "",
     message
@@ -67,15 +67,15 @@ export function buildConversationInput(
 }
 
 export function parseAnnotations(raw: string): Annotation[] {
-  const json = extractJson(raw);
-
   try {
-    const parsed = JSON.parse(json);
-    if (!Array.isArray(parsed)) {
+    const parsed = parseJsonFromText(raw);
+    const annotations = Array.isArray(parsed) ? parsed : isRecord(parsed) ? parsed.annotations : undefined;
+
+    if (!Array.isArray(annotations)) {
       return fallbackAnnotation(raw);
     }
 
-    return parsed
+    return annotations
       .filter((item) => item && typeof item === "object")
       .map((item) => ({
         phrase: String(item.phrase || "").slice(0, 80),
@@ -93,16 +93,27 @@ export function providerLabel(provider: AiProvider) {
   return provider === "openai" ? "OpenAI" : "Gemini";
 }
 
-function extractJson(raw: string) {
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === "object";
+}
+
+function parseJsonFromText(raw: string): unknown {
   const trimmed = raw.trim();
-  const firstBracket = trimmed.indexOf("[");
-  const lastBracket = trimmed.lastIndexOf("]");
+  try {
+    return JSON.parse(trimmed);
+  } catch {
+    const firstObject = trimmed.indexOf("{");
+    const firstArray = trimmed.indexOf("[");
+    const startsWithObject = firstObject >= 0 && (firstArray === -1 || firstObject < firstArray);
+    const start = startsWithObject ? firstObject : firstArray;
+    const end = startsWithObject ? trimmed.lastIndexOf("}") : trimmed.lastIndexOf("]");
 
-  if (firstBracket >= 0 && lastBracket > firstBracket) {
-    return trimmed.slice(firstBracket, lastBracket + 1);
+    if (start >= 0 && end > start) {
+      return JSON.parse(trimmed.slice(start, end + 1));
+    }
+
+    throw new Error("No JSON found.");
   }
-
-  return trimmed;
 }
 
 function fallbackAnnotation(raw: string): Annotation[] {

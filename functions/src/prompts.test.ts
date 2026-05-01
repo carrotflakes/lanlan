@@ -43,4 +43,16 @@ describe("prompts", () => {
       }
     ]);
   });
+
+  it("parses annotations from structured output wrapper JSON", () => {
+    expect(
+      parseAnnotations('Here: {"annotations":[{"phrase":"take off","meaning":"離陸する","note":"飛行機に使う句動詞"}]}')
+    ).toEqual([
+      {
+        phrase: "take off",
+        meaning: "離陸する",
+        note: "飛行機に使う句動詞"
+      }
+    ]);
+  });
 });
