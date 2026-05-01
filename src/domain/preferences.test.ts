@@ -8,7 +8,8 @@ describe("preferences", () => {
       targetLanguage: "ko",
       uiLanguage: "ja",
       theme: "system",
-      aiProvider: "gemini"
+      aiProvider: "gemini",
+      preloadAnnotations: false
     });
   });
 

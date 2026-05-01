@@ -44,6 +44,9 @@ export type UiText = {
   audioSection: string;
   autoPlayAssistantAudio: string;
   autoPlayAssistantAudioHint: string;
+  supportSection: string;
+  preloadAnnotations: string;
+  preloadAnnotationsHint: string;
   confirmDeleteSession: (title: string) => string;
   openaiUnavailable: string;
   genericError: string;
@@ -94,6 +97,9 @@ const en: UiText = {
   audioSection: "Audio",
   autoPlayAssistantAudio: "Auto-play AI replies",
   autoPlayAssistantAudioHint: "Play the assistant's voice automatically when a new reply arrives.",
+  supportSection: "Support",
+  preloadAnnotations: "Preload notes",
+  preloadAnnotationsHint: "Generate note popovers in the background after each AI reply.",
   confirmDeleteSession: (title) => `Delete "${title}"?`,
   openaiUnavailable: "OpenAI access is not enabled for this account.",
   genericError: "Something went wrong."
@@ -144,6 +150,9 @@ const ja: UiText = {
   audioSection: "音声",
   autoPlayAssistantAudio: "AIの返信を自動再生",
   autoPlayAssistantAudioHint: "新しいAI返信が届いたら自動で読み上げます。",
+  supportSection: "サポート",
+  preloadAnnotations: "注釈を先読み",
+  preloadAnnotationsHint: "AIの返信後に、注釈ポップオーバーを裏で生成します。",
   confirmDeleteSession: (title) => `「${title}」を削除しますか？`,
   openaiUnavailable: "このアカウントでは OpenAI を利用できません。",
   genericError: "問題が発生しました。"

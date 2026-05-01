@@ -54,7 +54,7 @@ async function completeWithGemini(input: CompletionInput) {
         })),
         generationConfig: {
           temperature: 0.7,
-          maxOutputTokens: 360,
+          maxOutputTokens: 800,
           ...(input.structuredOutput
             ? {
                 responseMimeType: "application/json",

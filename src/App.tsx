@@ -62,6 +62,7 @@ export function App() {
   const [composer, setComposer] = useState("");
   const [busy, setBusy] = useState(false);
   const [supportBusy, setSupportBusy] = useState<string | null>(null);
+  const [preloadingAnnotationIds, setPreloadingAnnotationIds] = useState<Set<string>>(() => new Set());
   const [visibleTranslations, setVisibleTranslations] = useState<Set<string>>(() => new Set());
   const [visibleNotes, setVisibleNotes] = useState<Set<string>>(() => new Set());
   const [error, setError] = useState<string | null>(null);
@@ -127,6 +128,7 @@ export function App() {
 
     setVisibleTranslations(new Set());
     setVisibleNotes(new Set());
+    setPreloadingAnnotationIds(new Set());
     seenAssistantMessageIdsRef.current = new Set();
     messagesInitializedRef.current = false;
 
@@ -241,7 +243,10 @@ export function App() {
         setSelectedSessionId(sessionId);
       }
 
-      await sendMessage({ sessionId, content });
+      const result = await sendMessage({ sessionId, content });
+      if (profile.preloadAnnotations) {
+        void preloadAnnotationsForMessage(sessionId, result.assistantMessageId);
+      }
     } catch (sendError) {
       setComposer(content);
       setError(errorMessage(sendError, t.genericError));
@@ -273,6 +278,11 @@ export function App() {
       return;
     }
 
+    if (!isTranslate && preloadingAnnotationIds.has(message.id)) {
+      showSupport(message.id, mode);
+      return;
+    }
+
     try {
       setSupportBusy(`${message.id}:${mode}`);
       setError(null);
@@ -282,6 +292,35 @@ export function App() {
       setError(errorMessage(supportError, t.genericError));
     } finally {
       setSupportBusy(null);
+    }
+  }
+
+  async function preloadAnnotationsForMessage(sessionId: string, messageId: string) {
+    setPreloadingAnnotationIds((current) => {
+      const next = new Set(current);
+      next.add(messageId);
+      return next;
+    });
+
+    try {
+      await generateSupport({ sessionId, messageId, mode: "annotate" });
+    } catch (preloadError) {
+      console.warn("Failed to preload annotations:", preloadError);
+      setVisibleNotes((current) => {
+        if (!current.has(messageId)) {
+          return current;
+        }
+
+        const next = new Set(current);
+        next.delete(messageId);
+        return next;
+      });
+    } finally {
+      setPreloadingAnnotationIds((current) => {
+        const next = new Set(current);
+        next.delete(messageId);
+        return next;
+      });
     }
   }
 
@@ -934,6 +973,23 @@ function SettingsPanel({
           <span>
             <strong>{t.autoPlayAssistantAudio}</strong>
             <small>{t.autoPlayAssistantAudioHint}</small>
+          </span>
+        </label>
+      </div>
+
+      <div className="settings-section">
+        <p className="section-title">{t.supportSection}</p>
+        <label className="toggle-row">
+          <input
+            type="checkbox"
+            checked={profile.preloadAnnotations}
+            onChange={(event) =>
+              onProfileChange({ ...profile, preloadAnnotations: event.target.checked })
+            }
+          />
+          <span>
+            <strong>{t.preloadAnnotations}</strong>
+            <small>{t.preloadAnnotationsHint}</small>
           </span>
         </label>
       </div>

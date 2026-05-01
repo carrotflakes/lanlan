@@ -37,12 +37,16 @@ export function supportPrompt(
   }
 
   return [
-    `Explain important words or phrases in this ${profile.targetLanguage} message for a ${profile.nativeLanguage} speaker.`,
+    "You are an assistant for language learners.",
+    `The learner is practicing ${profile.targetLanguage}. Extract useful words, phrases, and idioms for a ${profile.nativeLanguage} speaker.`,
+    "",
+    "For each item, preserve the exact original form and provide a brief meaning plus a short usage, grammar, or context note.",
+    `Write meaning and note in ${profile.nativeLanguage}.`,
+    "Include important content words and idiomatic expressions.",
     "Return compact JSON only, with this shape:",
     '{"annotations":[{"phrase":"...","meaning":"...","note":"..."}]}',
-    "Choose at most 4 useful items.",
     "",
-    message
+    `Text to analyze: "${message}"`
   ].join("\n");
 }
 

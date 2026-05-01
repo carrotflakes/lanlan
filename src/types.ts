@@ -11,6 +11,7 @@ export type Profile = {
   theme: ThemePreference;
   aiProvider: AiProvider;
   autoPlayAssistantAudio: boolean;
+  preloadAnnotations: boolean;
 };
 
 export type Session = {
@@ -51,7 +52,8 @@ export const defaultProfile: Profile = {
   uiLanguage: "ja",
   theme: "system",
   aiProvider: "gemini",
-  autoPlayAssistantAudio: false
+  autoPlayAssistantAudio: false,
+  preloadAnnotations: false
 };
 
 export const languageNames: Record<LanguageCode, string> = {

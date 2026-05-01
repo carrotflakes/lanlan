@@ -21,7 +21,11 @@ export function normalizeProfile(input: Partial<Profile> | null | undefined): Pr
     autoPlayAssistantAudio:
       typeof input?.autoPlayAssistantAudio === "boolean"
         ? input.autoPlayAssistantAudio
-        : defaultProfile.autoPlayAssistantAudio
+        : defaultProfile.autoPlayAssistantAudio,
+    preloadAnnotations:
+      typeof input?.preloadAnnotations === "boolean"
+        ? input.preloadAnnotations
+        : defaultProfile.preloadAnnotations
   };
 }
 
